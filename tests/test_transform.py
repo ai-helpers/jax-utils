@@ -16,6 +16,5 @@
 # JaxScaler(tensor_types_not_to_scale=(Titi, )).scale(Toto(array1, Titi(array1)))
 
 
-
 def test_tensor():
     pass

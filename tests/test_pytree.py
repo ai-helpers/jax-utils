@@ -17,6 +17,5 @@
 # pytree_to_axes(Toto(array1, Titi(array1)))
 
 
-
 def test_pytree():
     pass
