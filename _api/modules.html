@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jax-utils &mdash; AI Helpers Jax Utils 0.1.0a0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=edcd63a1"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="jax_utils package" href="jax_utils.html" />
+    <link rel="prev" title="Welcome to AI Helpers Jax Utils’s documentation!" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2E68D9" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                0.1.0a0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">jax-utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html">jax_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html">tests package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2E68D9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">AI Helpers Jax Utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">jax-utils</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_api/modules.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jax-utils">
+<h1>jax-utils<a class="headerlink" href="#jax-utils" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="jax_utils.html">jax_utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.common_tensor">jax_utils.common_tensor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.check_ndim_in"><code class="docutils literal notranslate"><span class="pre">check_ndim_in()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.is_broadcastable"><code class="docutils literal notranslate"><span class="pre">is_broadcastable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.TensorAxes"><code class="docutils literal notranslate"><span class="pre">TensorAxes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.TensorAxes.reverse_index"><code class="docutils literal notranslate"><span class="pre">TensorAxes.reverse_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.TensorAxes.mandatory"><code class="docutils literal notranslate"><span class="pre">TensorAxes.mandatory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.TensorAxes.optional"><code class="docutils literal notranslate"><span class="pre">TensorAxes.optional</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.expand_dims_axis"><code class="docutils literal notranslate"><span class="pre">expand_dims_axis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.AverageableArrayLike"><code class="docutils literal notranslate"><span class="pre">AverageableArrayLike</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.AverageableArrayLike.mean"><code class="docutils literal notranslate"><span class="pre">AverageableArrayLike.mean()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor"><code class="docutils literal notranslate"><span class="pre">Tensor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.array"><code class="docutils literal notranslate"><span class="pre">Tensor.array</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.check_array"><code class="docutils literal notranslate"><span class="pre">Tensor.check_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.getitem_from_axes"><code class="docutils literal notranslate"><span class="pre">Tensor.getitem_from_axes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.values"><code class="docutils literal notranslate"><span class="pre">Tensor.values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.reverse_values"><code class="docutils literal notranslate"><span class="pre">Tensor.reverse_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.dtype"><code class="docutils literal notranslate"><span class="pre">Tensor.dtype</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.shape"><code class="docutils literal notranslate"><span class="pre">Tensor.shape</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.ndim"><code class="docutils literal notranslate"><span class="pre">Tensor.ndim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.axes"><code class="docutils literal notranslate"><span class="pre">Tensor.axes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.actual_axes"><code class="docutils literal notranslate"><span class="pre">Tensor.actual_axes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.mean"><code class="docutils literal notranslate"><span class="pre">Tensor.mean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.mean_over_axes"><code class="docutils literal notranslate"><span class="pre">Tensor.mean_over_axes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.sum"><code class="docutils literal notranslate"><span class="pre">Tensor.sum()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.sum_over_axes"><code class="docutils literal notranslate"><span class="pre">Tensor.sum_over_axes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.has"><code class="docutils literal notranslate"><span class="pre">Tensor.has()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.has_actual"><code class="docutils literal notranslate"><span class="pre">Tensor.has_actual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.index"><code class="docutils literal notranslate"><span class="pre">Tensor.index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.reverse_index"><code class="docutils literal notranslate"><span class="pre">Tensor.reverse_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.size"><code class="docutils literal notranslate"><span class="pre">Tensor.size()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.Tensor.is_broadcastable_with"><code class="docutils literal notranslate"><span class="pre">Tensor.is_broadcastable_with()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.RegularizedArrayLikeCost"><code class="docutils literal notranslate"><span class="pre">RegularizedArrayLikeCost</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.RegularizedArrayLikeCost.cost"><code class="docutils literal notranslate"><span class="pre">RegularizedArrayLikeCost.cost</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.RegularizedArrayLikeCost.regularization"><code class="docutils literal notranslate"><span class="pre">RegularizedArrayLikeCost.regularization</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.RegularizedArrayLikeCost.lagrangian_coefficient"><code class="docutils literal notranslate"><span class="pre">RegularizedArrayLikeCost.lagrangian_coefficient</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.common_tensor.RegularizedArrayLikeCost.mean"><code class="docutils literal notranslate"><span class="pre">RegularizedArrayLikeCost.mean()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.compilation">jax_utils.compilation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.compilation.JaxCompilableProtocol"><code class="docutils literal notranslate"><span class="pre">JaxCompilableProtocol</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.compilation.JaxCompilableProtocol.is_compilation_enabled"><code class="docutils literal notranslate"><span class="pre">JaxCompilableProtocol.is_compilation_enabled</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.compilation.BaseJaxCompilable"><code class="docutils literal notranslate"><span class="pre">BaseJaxCompilable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.compilation.BaseJaxCompilable.is_compilation_enabled"><code class="docutils literal notranslate"><span class="pre">BaseJaxCompilable.is_compilation_enabled</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.compilation.BaseJaxCompilable.enable_compilation"><code class="docutils literal notranslate"><span class="pre">BaseJaxCompilable.enable_compilation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.compilation.BaseJaxCompilable.disable_compilation"><code class="docutils literal notranslate"><span class="pre">BaseJaxCompilable.disable_compilation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.compilation.jit_when_compilation_enabled"><code class="docutils literal notranslate"><span class="pre">jit_when_compilation_enabled()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.dynamics">jax_utils.dynamics module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.dynamics.JaxDynamics"><code class="docutils literal notranslate"><span class="pre">JaxDynamics</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.dynamics.JaxDynamics.scalar_cost"><code class="docutils literal notranslate"><span class="pre">JaxDynamics.scalar_cost()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.dynamics.JaxDynamics.compute_gradient"><code class="docutils literal notranslate"><span class="pre">JaxDynamics.compute_gradient()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.dynamics.VectorizedJaxDynamics"><code class="docutils literal notranslate"><span class="pre">VectorizedJaxDynamics</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.dynamics.VectorizedJaxDynamics.dynamics"><code class="docutils literal notranslate"><span class="pre">VectorizedJaxDynamics.dynamics</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.dynamics.VectorizedJaxDynamics.vectorized_axis"><code class="docutils literal notranslate"><span class="pre">VectorizedJaxDynamics.vectorized_axis</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.dynamics.RegularizedJaxDynamics"><code class="docutils literal notranslate"><span class="pre">RegularizedJaxDynamics</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.dynamics.RegularizedJaxDynamics.dynamics"><code class="docutils literal notranslate"><span class="pre">RegularizedJaxDynamics.dynamics</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.dynamics.RegularizedJaxDynamics.cost_regularizer"><code class="docutils literal notranslate"><span class="pre">RegularizedJaxDynamics.cost_regularizer</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.gradient">jax_utils.gradient module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.BaseGradientStep"><code class="docutils literal notranslate"><span class="pre">BaseGradientStep</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.BaseGradientStep.init_optimizer"><code class="docutils literal notranslate"><span class="pre">BaseGradientStep.init_optimizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.BaseGradientStep.compute_gradient"><code class="docutils literal notranslate"><span class="pre">BaseGradientStep.compute_gradient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.BaseGradientStep.update"><code class="docutils literal notranslate"><span class="pre">BaseGradientStep.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.GradientStep"><code class="docutils literal notranslate"><span class="pre">GradientStep</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.GradientStep.optimizer"><code class="docutils literal notranslate"><span class="pre">GradientStep.optimizer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.GradientStep.dynamics"><code class="docutils literal notranslate"><span class="pre">GradientStep.dynamics</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.GradientStep.init_optimizer"><code class="docutils literal notranslate"><span class="pre">GradientStep.init_optimizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.GradientStep.compute_gradient"><code class="docutils literal notranslate"><span class="pre">GradientStep.compute_gradient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.GradientStep.update"><code class="docutils literal notranslate"><span class="pre">GradientStep.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.VectorizedGradientStep"><code class="docutils literal notranslate"><span class="pre">VectorizedGradientStep</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.VectorizedGradientStep.gradient_step"><code class="docutils literal notranslate"><span class="pre">VectorizedGradientStep.gradient_step</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.VectorizedGradientStep.vectorized_axis"><code class="docutils literal notranslate"><span class="pre">VectorizedGradientStep.vectorized_axis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.VectorizedGradientStep.init_optimizer"><code class="docutils literal notranslate"><span class="pre">VectorizedGradientStep.init_optimizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.VectorizedGradientStep.compute_gradient"><code class="docutils literal notranslate"><span class="pre">VectorizedGradientStep.compute_gradient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.gradient.VectorizedGradientStep.update"><code class="docutils literal notranslate"><span class="pre">VectorizedGradientStep.update()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.jax_tensor">jax_utils.jax_tensor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.JaxTensor"><code class="docutils literal notranslate"><span class="pre">JaxTensor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.JaxTensor.array"><code class="docutils literal notranslate"><span class="pre">JaxTensor.array</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.JaxTensor.is_broadcastable_with"><code class="docutils literal notranslate"><span class="pre">JaxTensor.is_broadcastable_with()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.JaxTensor.from_flattened_axes"><code class="docutils literal notranslate"><span class="pre">JaxTensor.from_flattened_axes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.JaxTensor.convert_to_axes"><code class="docutils literal notranslate"><span class="pre">JaxTensor.convert_to_axes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.NonNegativeValues"><code class="docutils literal notranslate"><span class="pre">NonNegativeValues</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.NonNegativeValues.array"><code class="docutils literal notranslate"><span class="pre">NonNegativeValues.array</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.NonNegativeValues.values"><code class="docutils literal notranslate"><span class="pre">NonNegativeValues.values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.NonNegativeValues.reverse_values"><code class="docutils literal notranslate"><span class="pre">NonNegativeValues.reverse_values()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.NonNegativeBudgetedValues"><code class="docutils literal notranslate"><span class="pre">NonNegativeBudgetedValues</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.NonNegativeBudgetedValues.array"><code class="docutils literal notranslate"><span class="pre">NonNegativeBudgetedValues.array</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.NonNegativeBudgetedValues.max_budget"><code class="docutils literal notranslate"><span class="pre">NonNegativeBudgetedValues.max_budget</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.NonNegativeBudgetedValues.values"><code class="docutils literal notranslate"><span class="pre">NonNegativeBudgetedValues.values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.NonNegativeBudgetedValues.reverse_values"><code class="docutils literal notranslate"><span class="pre">NonNegativeBudgetedValues.reverse_values()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.RegularizedJaxCost"><code class="docutils literal notranslate"><span class="pre">RegularizedJaxCost</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.RegularizedJaxCost.cost"><code class="docutils literal notranslate"><span class="pre">RegularizedJaxCost.cost</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.RegularizedJaxCost.regularization"><code class="docutils literal notranslate"><span class="pre">RegularizedJaxCost.regularization</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.RegularizedJaxCost.lagrangian_coefficient"><code class="docutils literal notranslate"><span class="pre">RegularizedJaxCost.lagrangian_coefficient</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.jax_tensor.RegularizedJaxCost.mean"><code class="docutils literal notranslate"><span class="pre">RegularizedJaxCost.mean()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.markov_decision_process">jax_utils.markov_decision_process module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.markov_decision_process.Dynamics"><code class="docutils literal notranslate"><span class="pre">Dynamics</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.markov_decision_process.CostRegularizer"><code class="docutils literal notranslate"><span class="pre">CostRegularizer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.markov_decision_process.RegularizedDynamics"><code class="docutils literal notranslate"><span class="pre">RegularizedDynamics</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.markov_decision_process.RegularizedDynamics.dynamics"><code class="docutils literal notranslate"><span class="pre">RegularizedDynamics.dynamics</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.markov_decision_process.RegularizedDynamics.cost_regularizer"><code class="docutils literal notranslate"><span class="pre">RegularizedDynamics.cost_regularizer</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.optim">jax_utils.optim module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimizationState"><code class="docutils literal notranslate"><span class="pre">OptimizationState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimizationState.iteration"><code class="docutils literal notranslate"><span class="pre">OptimizationState.iteration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimizationState.state"><code class="docutils literal notranslate"><span class="pre">OptimizationState.state</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimizationState.action"><code class="docutils literal notranslate"><span class="pre">OptimizationState.action</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimizationState.cost"><code class="docutils literal notranslate"><span class="pre">OptimizationState.cost</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimizationState.optimizer_state"><code class="docutils literal notranslate"><span class="pre">OptimizationState.optimizer_state</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimizationState.scalar_cost"><code class="docutils literal notranslate"><span class="pre">OptimizationState.scalar_cost</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingCondition"><code class="docutils literal notranslate"><span class="pre">OptimStoppingCondition</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingCondition.stop"><code class="docutils literal notranslate"><span class="pre">OptimStoppingCondition.stop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingCondition.reset"><code class="docutils literal notranslate"><span class="pre">OptimStoppingCondition.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingCondition.nb_iterations_upper_bound"><code class="docutils literal notranslate"><span class="pre">OptimStoppingCondition.nb_iterations_upper_bound</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionsCombination"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionsCombination</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionsCombination.stopping_condition_1"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionsCombination.stopping_condition_1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionsCombination.stopping_condition_2"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionsCombination.stopping_condition_2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionsCombination.enable_compilation"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionsCombination.enable_compilation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionsCombination.disable_compilation"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionsCombination.disable_compilation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionIntersection"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionIntersection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionIntersection.stopping_condition_1"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionIntersection.stopping_condition_1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionIntersection.stopping_condition_2"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionIntersection.stopping_condition_2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionIntersection.stop"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionIntersection.stop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionIntersection.reset"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionIntersection.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionIntersection.nb_iterations_upper_bound"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionIntersection.nb_iterations_upper_bound</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionUnion"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionUnion</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionUnion.stopping_condition_1"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionUnion.stopping_condition_1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionUnion.stopping_condition_2"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionUnion.stopping_condition_2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionUnion.stop"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionUnion.stop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionUnion.reset"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionUnion.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.OptimStoppingConditionUnion.nb_iterations_upper_bound"><code class="docutils literal notranslate"><span class="pre">OptimStoppingConditionUnion.nb_iterations_upper_bound</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MaxIterationsStoppingCondition"><code class="docutils literal notranslate"><span class="pre">MaxIterationsStoppingCondition</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MaxIterationsStoppingCondition.max_iterations"><code class="docutils literal notranslate"><span class="pre">MaxIterationsStoppingCondition.max_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MaxIterationsStoppingCondition.stop"><code class="docutils literal notranslate"><span class="pre">MaxIterationsStoppingCondition.stop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MaxIterationsStoppingCondition.nb_iterations_upper_bound"><code class="docutils literal notranslate"><span class="pre">MaxIterationsStoppingCondition.nb_iterations_upper_bound</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinIterationsStoppingCondition"><code class="docutils literal notranslate"><span class="pre">MinIterationsStoppingCondition</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinIterationsStoppingCondition.min_iterations"><code class="docutils literal notranslate"><span class="pre">MinIterationsStoppingCondition.min_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinIterationsStoppingCondition.stop"><code class="docutils literal notranslate"><span class="pre">MinIterationsStoppingCondition.stop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaActionStoppingCondition"><code class="docutils literal notranslate"><span class="pre">MinDeltaActionStoppingCondition</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaActionStoppingCondition.relative_tolerance"><code class="docutils literal notranslate"><span class="pre">MinDeltaActionStoppingCondition.relative_tolerance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaActionStoppingCondition.absolute_tolerance"><code class="docutils literal notranslate"><span class="pre">MinDeltaActionStoppingCondition.absolute_tolerance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaActionStoppingCondition.stop"><code class="docutils literal notranslate"><span class="pre">MinDeltaActionStoppingCondition.stop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaActionStoppingCondition.reset"><code class="docutils literal notranslate"><span class="pre">MinDeltaActionStoppingCondition.reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaCostStoppingCondition"><code class="docutils literal notranslate"><span class="pre">MinDeltaCostStoppingCondition</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaCostStoppingCondition.relative_tolerance"><code class="docutils literal notranslate"><span class="pre">MinDeltaCostStoppingCondition.relative_tolerance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaCostStoppingCondition.absolute_tolerance"><code class="docutils literal notranslate"><span class="pre">MinDeltaCostStoppingCondition.absolute_tolerance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaCostStoppingCondition.window_length"><code class="docutils literal notranslate"><span class="pre">MinDeltaCostStoppingCondition.window_length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaCostStoppingCondition.stop"><code class="docutils literal notranslate"><span class="pre">MinDeltaCostStoppingCondition.stop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.MinDeltaCostStoppingCondition.reset"><code class="docutils literal notranslate"><span class="pre">MinDeltaCostStoppingCondition.reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.CostHistory"><code class="docutils literal notranslate"><span class="pre">CostHistory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.CostHistory.scalar_costs"><code class="docutils literal notranslate"><span class="pre">CostHistory.scalar_costs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.CostHistory.plot_scalar_costs"><code class="docutils literal notranslate"><span class="pre">CostHistory.plot_scalar_costs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.optim.GradientDescentOptimizationLoop"><code class="docutils literal notranslate"><span class="pre">GradientDescentOptimizationLoop</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.GradientDescentOptimizationLoop.gradient_step"><code class="docutils literal notranslate"><span class="pre">GradientDescentOptimizationLoop.gradient_step</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.GradientDescentOptimizationLoop.stopping_condition"><code class="docutils literal notranslate"><span class="pre">GradientDescentOptimizationLoop.stopping_condition</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.optim.GradientDescentOptimizationLoop.resume"><code class="docutils literal notranslate"><span class="pre">GradientDescentOptimizationLoop.resume()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.pytree">jax_utils.pytree module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.pytree.ConvertibleToAxes"><code class="docutils literal notranslate"><span class="pre">ConvertibleToAxes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.pytree.ConvertibleToAxes.convert_to_axes"><code class="docutils literal notranslate"><span class="pre">ConvertibleToAxes.convert_to_axes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.pytree.pytree_to_axes"><code class="docutils literal notranslate"><span class="pre">pytree_to_axes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.tranform">jax_utils.tranform module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.scale_jax_tensor"><code class="docutils literal notranslate"><span class="pre">scale_jax_tensor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.unscale_jax_tensor"><code class="docutils literal notranslate"><span class="pre">unscale_jax_tensor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.JaxScaler"><code class="docutils literal notranslate"><span class="pre">JaxScaler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.JaxScaler.scaling_factors"><code class="docutils literal notranslate"><span class="pre">JaxScaler.scaling_factors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.JaxScaler.scaling_axes"><code class="docutils literal notranslate"><span class="pre">JaxScaler.scaling_axes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.JaxScaler.tensor_types_to_scale"><code class="docutils literal notranslate"><span class="pre">JaxScaler.tensor_types_to_scale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.JaxScaler.tensor_types_not_to_scale"><code class="docutils literal notranslate"><span class="pre">JaxScaler.tensor_types_not_to_scale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.JaxScaler.from_tensor"><code class="docutils literal notranslate"><span class="pre">JaxScaler.from_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.JaxScaler.scale"><code class="docutils literal notranslate"><span class="pre">JaxScaler.scale()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.JaxScaler.unscale"><code class="docutils literal notranslate"><span class="pre">JaxScaler.unscale()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.tranform.JaxScaler.expand_scaling_factors"><code class="docutils literal notranslate"><span class="pre">JaxScaler.expand_scaling_factors()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.typing">jax_utils.typing module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.typing.DataclassInstance"><code class="docutils literal notranslate"><span class="pre">DataclassInstance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableIndexingOrSlicing"><code class="docutils literal notranslate"><span class="pre">HashableIndexingOrSlicing</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableIndexingOrSlicing.values"><code class="docutils literal notranslate"><span class="pre">HashableIndexingOrSlicing.values</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableSlicing"><code class="docutils literal notranslate"><span class="pre">HashableSlicing</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableSlicing.start"><code class="docutils literal notranslate"><span class="pre">HashableSlicing.start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableSlicing.stop"><code class="docutils literal notranslate"><span class="pre">HashableSlicing.stop</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableSlicing.step"><code class="docutils literal notranslate"><span class="pre">HashableSlicing.step</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableSlicing.values"><code class="docutils literal notranslate"><span class="pre">HashableSlicing.values</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableIndexing"><code class="docutils literal notranslate"><span class="pre">HashableIndexing</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableIndexing.indices"><code class="docutils literal notranslate"><span class="pre">HashableIndexing.indices</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.typing.HashableIndexing.values"><code class="docutils literal notranslate"><span class="pre">HashableIndexing.values</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils.vectorization">jax_utils.vectorization module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.vectorization.JaxVectorizableProtocol"><code class="docutils literal notranslate"><span class="pre">JaxVectorizableProtocol</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.vectorization.JaxVectorizableProtocol.vectorized_axis"><code class="docutils literal notranslate"><span class="pre">JaxVectorizableProtocol.vectorized_axis</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.vectorization.vectorize"><code class="docutils literal notranslate"><span class="pre">vectorize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="jax_utils.html#jax_utils.vectorization.JaxDataclassNestedConvertibleToAxes"><code class="docutils literal notranslate"><span class="pre">JaxDataclassNestedConvertibleToAxes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="jax_utils.html#jax_utils.vectorization.JaxDataclassNestedConvertibleToAxes.convert_to_axes"><code class="docutils literal notranslate"><span class="pre">JaxDataclassNestedConvertibleToAxes.convert_to_axes()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jax_utils.html#module-jax_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests.test_compilation">tests.test_compilation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tests.html#tests.test_compilation.test_complilation"><code class="docutils literal notranslate"><span class="pre">test_complilation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests.test_gradient">tests.test_gradient module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tests.html#tests.test_gradient.test_gradient"><code class="docutils literal notranslate"><span class="pre">test_gradient()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests.test_jax_tensor">tests.test_jax_tensor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tests.html#tests.test_jax_tensor.test_tensor"><code class="docutils literal notranslate"><span class="pre">test_tensor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests.test_optim">tests.test_optim module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tests.html#tests.test_optim.test_tensor"><code class="docutils literal notranslate"><span class="pre">test_tensor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests.test_pytree">tests.test_pytree module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tests.html#tests.test_pytree.test_pytree"><code class="docutils literal notranslate"><span class="pre">test_pytree()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests.test_transform">tests.test_transform module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tests.html#tests.test_transform.test_tensor"><code class="docutils literal notranslate"><span class="pre">test_tensor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests.test_vectorization">tests.test_vectorization module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tests.html#tests.test_vectorization.test_vector"><code class="docutils literal notranslate"><span class="pre">test_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to AI Helpers Jax Utils’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jax_utils.html" class="btn btn-neutral float-right" title="jax_utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AI-Helpers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

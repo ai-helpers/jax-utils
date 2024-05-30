@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jax_utils.gradient &mdash; AI Helpers Jax Utils 0.1.0a0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=edcd63a1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2E68D9" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                0.1.0a0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../_api/modules.html">jax-utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2E68D9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AI Helpers Jax Utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jax_utils.gradient</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jax_utils.gradient</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Classes and methods to compute the gradient of functions involving jax arrays transformations&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">import</span> <span class="nn">jax_dataclasses</span> <span class="k">as</span> <span class="nn">jdc</span>
+<span class="kn">import</span> <span class="nn">optax</span>
+
+<span class="kn">from</span> <span class="nn">jax_utils.compilation</span> <span class="kn">import</span> <span class="n">jit_when_compilation_enabled</span>
+<span class="kn">from</span> <span class="nn">jax_utils.dynamics</span> <span class="kn">import</span> <span class="n">JaxDynamics</span>
+<span class="kn">from</span> <span class="nn">jax_utils.jax_tensor</span> <span class="kn">import</span> <span class="n">AverageableJaxArrayLike</span>
+<span class="kn">from</span> <span class="nn">jax_utils.vectorization</span> <span class="kn">import</span> <span class="n">JaxDataclassNestedConvertibleToAxes</span><span class="p">,</span> <span class="n">vectorize</span>
+
+<span class="n">State</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">)</span>
+<span class="n">State_contra</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;State_contra&quot;</span><span class="p">,</span> <span class="n">contravariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Action</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Action&quot;</span><span class="p">)</span>
+<span class="n">Observation_co</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Observation_co&quot;</span><span class="p">,</span> <span class="n">covariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Cost_co</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Cost_co&quot;</span><span class="p">,</span> <span class="n">covariant</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">AverageableJaxArrayLike</span><span class="p">)</span>
+<span class="n">OptimizerState</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;OptimizerState&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">optax</span><span class="o">.</span><span class="n">OptState</span><span class="p">)</span>
+<span class="n">GradientUpdates</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;GradientUpdates&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">optax</span><span class="o">.</span><span class="n">Updates</span><span class="p">)</span>
+<span class="n">AxisType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;AxisType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Hashable</span><span class="p">)</span>
+<span class="n">AxisType_contra</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;AxisType_contra&quot;</span><span class="p">,</span> <span class="n">contravariant</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Hashable</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BaseGradientStep">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.BaseGradientStep">[docs]</a>
+<span class="k">class</span> <span class="nc">BaseGradientStep</span><span class="p">(</span>
+    <span class="n">JaxDataclassNestedConvertibleToAxes</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">],</span>
+    <span class="n">Protocol</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">,</span> <span class="n">State_contra</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for gradient steps on the  :class:`jax_utils.markov_decision_process.Dynamics` cost of a Markov</span>
+<span class="sd">    Decision Process.&quot;&quot;&quot;</span>
+
+    <span class="c1"># pylint: disable=C0116</span>
+<div class="viewcode-block" id="BaseGradientStep.init_optimizer">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.BaseGradientStep.init_optimizer">[docs]</a>
+    <span class="k">def</span> <span class="nf">init_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizerState</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+    <span class="c1"># pylint: disable=C0116</span>
+<div class="viewcode-block" id="BaseGradientStep.compute_gradient">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.BaseGradientStep.compute_gradient">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_gradient</span><span class="p">(</span></div>
+
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">State_contra</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Cost_co</span><span class="p">,</span> <span class="n">Action</span><span class="p">]:</span> <span class="o">...</span>
+
+    <span class="c1"># pylint: disable=C0116</span>
+<div class="viewcode-block" id="BaseGradientStep.update">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.BaseGradientStep.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span></div>
+
+        <span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">:</span> <span class="n">GradientUpdates</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">:</span> <span class="n">OptimizerState</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span> <span class="o">...</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">State_contra</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
+        <span class="n">opt_state</span><span class="p">:</span> <span class="n">OptimizerState</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">]:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="GradientStep">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.GradientStep">[docs]</a>
+<span class="nd">@jdc</span><span class="o">.</span><span class="n">pytree_dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">GradientStep</span><span class="p">(</span>
+    <span class="n">BaseGradientStep</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
+    <span class="n">Generic</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">Observation_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The gradient step on the :class:`jax_utils.markov_decision_process.Dynamics` cos</span>
+<span class="sd">    of a Markov Decision Process.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        optimizer (jdc.Static[optax.GradientTransformation]): an optimizer (defining the</span>
+<span class="sd">            stochastic gradient descent variant: RMSProp, Adam, etc..)</span>
+<span class="sd">        dynamics (JaxDynamics[Any, State, Action, Cost_co, Observation_co]): an MDP dynamics</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">optimizer</span><span class="p">:</span> <span class="n">jdc</span><span class="o">.</span><span class="n">Static</span><span class="p">[</span><span class="n">optax</span><span class="o">.</span><span class="n">GradientTransformation</span><span class="p">]</span>
+    <span class="n">dynamics</span><span class="p">:</span> <span class="n">JaxDynamics</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">Observation_co</span><span class="p">]</span>
+
+<div class="viewcode-block" id="GradientStep.init_optimizer">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.GradientStep.init_optimizer">[docs]</a>
+    <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">init_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizerState</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize optimizer</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init_action (Action): initial action before optimization starts</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            OptimizerState: initialized optimizer state</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">init_action</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GradientStep.compute_gradient">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.GradientStep.compute_gradient">[docs]</a>
+    <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">compute_gradient</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Cost_co</span><span class="p">,</span> <span class="n">Action</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a state-action pair of the MDP, computes the cost and gradient</span>
+<span class="sd">        of the cost of a ``dynamics`` w.r.t. the action.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state (State): state of the MDP</span>
+<span class="sd">            action (Action): action of the MDP</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[Cost_co, Action]: cost and gradient of the action</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamics</span><span class="o">.</span><span class="n">compute_gradient</span><span class="p">(</span>
+            <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GradientStep.update">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.GradientStep.update">[docs]</a>
+    <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">:</span> <span class="n">GradientUpdates</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">:</span> <span class="n">OptimizerState</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the action and optimizer state</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            action (Action): action of the MDP</span>
+<span class="sd">            gradient_value (GradientUpdates): gradient of the action</span>
+<span class="sd">            opt_state (OptimizerState): optimizer state</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[Action, OptimizerState]: the new action and optimizer state</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">updates</span><span class="p">,</span> <span class="n">updated_opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">gradient_value</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+        <span class="n">updated_action</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">updated_action</span><span class="p">,</span> <span class="n">updated_opt_state</span></div>
+
+
+    <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
+        <span class="n">opt_state</span><span class="p">:</span> <span class="n">OptimizerState</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes the gradient of the cost w.r.t. the action and updates the action and optimizer state.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state (State): state of the MDP</span>
+<span class="sd">            action (Action): action of the MDP</span>
+<span class="sd">            opt_state (OptimizerState): optimizer state</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[Action, OptimizerState, Cost_co]: a new action, optimizer state and the value of the cost</span>
+<span class="sd">                associated to the previous action</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cost_value</span><span class="p">,</span> <span class="n">gradient_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_gradient</span><span class="p">(</span>
+            <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">updated_action</span><span class="p">,</span> <span class="n">updated_opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">updated_action</span><span class="p">,</span> <span class="n">updated_opt_state</span><span class="p">,</span> <span class="n">cost_value</span></div>
+
+
+
+<div class="viewcode-block" id="VectorizedGradientStep">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.VectorizedGradientStep">[docs]</a>
+<span class="nd">@jdc</span><span class="o">.</span><span class="n">pytree_dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">VectorizedGradientStep</span><span class="p">(</span><span class="n">BaseGradientStep</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A gradient step that is `vectorized &lt;https://jax.readthedocs.io/en/latest/jax-101/03-vectorization.html&gt;`_ on a</span>
+<span class="sd">    specific axis</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gradient_step (BaseGradientStep[AxisType, State, Action, Cost_co, OptimizerState]): the gradient step to be</span>
+<span class="sd">            vectorized</span>
+<span class="sd">        vectorized_axis (jdc.Static[AxisType]): &quot;named&quot; axis to be vectorized</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gradient_step</span><span class="p">:</span> <span class="n">BaseGradientStep</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="n">vectorized_axis</span><span class="p">:</span> <span class="n">jdc</span><span class="o">.</span><span class="n">Static</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]</span>
+
+<div class="viewcode-block" id="VectorizedGradientStep.init_optimizer">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.VectorizedGradientStep.init_optimizer">[docs]</a>
+    <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">init_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizerState</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_step</span><span class="o">.</span><span class="n">init_optimizer</span><span class="p">(</span><span class="n">init_action</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VectorizedGradientStep.compute_gradient">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.VectorizedGradientStep.compute_gradient">[docs]</a>
+    <span class="nd">@vectorize</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">compute_gradient</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Cost_co</span><span class="p">,</span> <span class="n">Action</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_step</span><span class="o">.</span><span class="n">compute_gradient</span><span class="p">(</span>
+            <span class="n">state</span><span class="p">,</span>
+            <span class="n">action</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VectorizedGradientStep.update">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.VectorizedGradientStep.update">[docs]</a>
+    <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">:</span> <span class="n">GradientUpdates</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">:</span> <span class="n">OptimizerState</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_step</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">)</span></div>
+
+
+    <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
+        <span class="n">opt_state</span><span class="p">:</span> <span class="n">OptimizerState</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">]:</span>
+        <span class="n">cost_value</span><span class="p">,</span> <span class="n">gradient_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_gradient</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+        <span class="n">updated_action</span><span class="p">,</span> <span class="n">updated_opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">updated_action</span><span class="p">,</span> <span class="n">updated_opt_state</span><span class="p">,</span> <span class="n">cost_value</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AI-Helpers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

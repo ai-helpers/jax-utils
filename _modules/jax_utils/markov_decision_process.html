@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jax_utils.markov_decision_process &mdash; AI Helpers Jax Utils 0.1.0a0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=edcd63a1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2E68D9" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                0.1.0a0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../_api/modules.html">jax-utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2E68D9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AI Helpers Jax Utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jax_utils.markov_decision_process</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jax_utils.markov_decision_process</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;High-level abstractions for decision problems (Markov Decision processes, etc...)&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="n">State</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">)</span>
+<span class="n">State_contra</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;State_contra&quot;</span><span class="p">,</span> <span class="n">contravariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Action</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Action&quot;</span><span class="p">)</span>
+<span class="n">Action_contra</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Action_contra&quot;</span><span class="p">,</span> <span class="n">contravariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Observation</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Observation&quot;</span><span class="p">)</span>
+<span class="n">Observation_co</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Observation_co&quot;</span><span class="p">,</span> <span class="n">covariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Observation_contra</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Observation_contra&quot;</span><span class="p">,</span> <span class="n">contravariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Cost</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Cost&quot;</span><span class="p">)</span>
+<span class="n">Cost_co</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Cost_co&quot;</span><span class="p">,</span> <span class="n">covariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Cost_contra</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Cost_contra&quot;</span><span class="p">,</span> <span class="n">contravariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">RegularizedCost</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;RegularizedCost&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Dynamics">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.markov_decision_process.Dynamics">[docs]</a>
+<span class="k">class</span> <span class="nc">Dynamics</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action_contra</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">Observation_co</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface defining the dynamics of a</span>
+<span class="sd">    `(Partially Observable) &lt;https://en.wikipedia.org/wiki/Partially_observable_Markov_decision_process&gt;`_</span>
+<span class="sd">    `Markov Decision Process &lt;https://en.wikipedia.org/wiki/Markov_decision_process&gt;`_.</span>
+
+<span class="sd">    When an &quot;agent&quot; interacting with the (PO)MDP plays an &quot;action&quot; (a.k.a. &quot;control&quot;)</span>
+<span class="sd">    in a given &quot;state&quot;, the (PO)MDP transitions to a new state and the agent observes</span>
+<span class="sd">    some signal/feedback in the form of a &quot;cost&quot;/&quot;reward&quot; as well as additional &quot;observations&quot;.</span>
+
+<span class="sd">    A `Dynamics` is therefore a callable that maps a state-action pair to a state-cost-observation tuple.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Action_contra</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">Observation_co</span><span class="p">]:</span>
+        <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="CostRegularizer">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.markov_decision_process.CostRegularizer">[docs]</a>
+<span class="k">class</span> <span class="nc">CostRegularizer</span><span class="p">(</span>
+    <span class="n">Protocol</span><span class="p">[</span><span class="n">State_contra</span><span class="p">,</span> <span class="n">Action_contra</span><span class="p">,</span> <span class="n">Cost_contra</span><span class="p">,</span> <span class="n">Observation_contra</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for callables that map any state-action-cost-observation tuple to a new &quot;regularized&quot; cost.</span>
+
+<span class="sd">    `More about regularization &lt;https://en.wikipedia.org/wiki/Regularization_(mathematics)&gt;`_.</span>
+
+<span class="sd">    Example: one may want to penalize `action` with high norms, etc...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">State_contra</span><span class="p">,</span>
+        <span class="n">action</span><span class="p">:</span> <span class="n">Action_contra</span><span class="p">,</span>
+        <span class="n">cost</span><span class="p">:</span> <span class="n">Cost_contra</span><span class="p">,</span>
+        <span class="n">observation</span><span class="p">:</span> <span class="n">Observation_contra</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Cost_co</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="RegularizedDynamics">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.markov_decision_process.RegularizedDynamics">[docs]</a>
+<span class="k">class</span> <span class="nc">RegularizedDynamics</span><span class="p">(</span>
+    <span class="n">Dynamics</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">RegularizedCost</span><span class="p">,</span> <span class="n">Observation</span><span class="p">],</span>
+    <span class="n">Protocol</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">RegularizedCost</span><span class="p">,</span> <span class="n">Observation</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface defining a wrapper around class :class:`jax_utils.markov_decision_process.Dynamics` that allows to add</span>
+<span class="sd">    a regularization to the cost.</span>
+
+<span class="sd">    A ``RegularizedDynamics`` is itself a :class:`jax_utils.markov_decision_process.Dynamics``.</span>
+
+<span class="sd">    `More about regularization &lt;https://en.wikipedia.org/wiki/Regularization_(mathematics)&gt;`_.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dynamics (Dynamics[State, Action, Cost, Observation]): callable defining the dynamics of a (PO)MDP</span>
+<span class="sd">        cost_regularizer (CostRegularizer[State, Action, Cost, Observation, RegularizedCost]): callable</span>
+<span class="sd">        defining a cost transformation (regularization)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dynamics</span><span class="p">:</span> <span class="n">Dynamics</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">Observation</span><span class="p">]</span>
+    <span class="n">cost_regularizer</span><span class="p">:</span> <span class="n">CostRegularizer</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">Observation</span><span class="p">,</span> <span class="n">RegularizedCost</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">RegularizedCost</span><span class="p">,</span> <span class="n">Observation</span><span class="p">]:</span>
+        <span class="n">state</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">observation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamics</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+        <span class="n">regularized_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_regularizer</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">observation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state</span><span class="p">,</span> <span class="n">regularized_cost</span><span class="p">,</span> <span class="n">observation</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AI-Helpers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

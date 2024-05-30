@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jax_utils.common_tensor &mdash; AI Helpers Jax Utils 0.1.0a0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=edcd63a1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2E68D9" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                0.1.0a0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../_api/modules.html">jax-utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2E68D9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AI Helpers Jax Utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jax_utils.common_tensor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jax_utils.common_tensor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Wrappers around numpy/jax arrays&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AbstractSet</span><span class="p">,</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">ClassVar</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">Hashable</span><span class="p">,</span>
+    <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Protocol</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">TypeAlias</span><span class="p">,</span>
+    <span class="n">TypeVar</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">runtime_checkable</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ordered_set</span> <span class="kn">import</span> <span class="n">OrderedSet</span><span class="p">,</span> <span class="n">OrderedSetInitializer</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
+
+<span class="kn">from</span> <span class="nn">jax_utils.typing</span> <span class="kn">import</span> <span class="n">DataclassInstance</span>
+
+<span class="n">Array</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+<span class="n">Scalar</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="check_ndim_in">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.check_ndim_in">[docs]</a>
+<span class="k">def</span> <span class="nf">check_ndim_in</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">allowed_ndims</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if the number of dimensions matches some allowed values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (Array): numpy or JAX array</span>
+<span class="sd">        allowed_ndims (Iterable[int]): number of dimensions allowed for ``array``</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: when the number of dimensions of ``array`` is not present in ``allowed_shapes``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_ndims</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension of delivery should be in </span><span class="si">{</span><span class="n">allowed_ndims</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="is_broadcastable">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.is_broadcastable">[docs]</a>
+<span class="k">def</span> <span class="nf">is_broadcastable</span><span class="p">(</span><span class="n">shape_1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">shape_2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether the shapes of 2 arrays/tensors can be</span>
+<span class="sd">    `broadcasted &lt;https://numpy.org/doc/stable/user/basics.broadcasting.html&gt;`_.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        shape_1 (Tuple[int, ...]): shape of the 1st array</span>
+<span class="sd">        shape_2 (Tuple[int, ...]): shape of the 2nd array</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: ``True`` if and only if the 2 arrays/tensors can be broadcasted, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">dim1</span><span class="p">,</span> <span class="n">dim2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">shape_1</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">shape_2</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">dim1</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">dim2</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">dim1</span> <span class="o">==</span> <span class="n">dim2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Hashable</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TensorAxes">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.TensorAxes">[docs]</a>
+<span class="k">class</span> <span class="nc">TensorAxes</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An ordered set of &quot;named&quot; array/tensor axes.</span>
+
+<span class="sd">    The position in the set defines the axis index in the tensor.</span>
+
+<span class="sd">    The first ``len(self) - tensor_min_dim`` axes are optional:</span>
+<span class="sd">    if absent, they are assumed to be &quot;flattened&quot;.</span>
+
+<span class="sd">    The reason for not making the last ``tensor_min_dim`` axes optional instead of the first</span>
+<span class="sd">    ``len(self) - tensor_min_dim`` axes is to follow the logic of array broadcasting (first dimension can be omitted).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">initial</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OrderedSetInitializer</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tensor_min_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">initial</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="n">tensor_min_dim</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;tensor_min_shape_length should be smaller than the number of specified axes&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">tensor_min_dim</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;tensor_min_shape_length should be greater than or equal to 0&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tensor_min_nb_dim</span> <span class="o">=</span> <span class="n">tensor_min_dim</span>
+
+<div class="viewcode-block" id="TensorAxes.reverse_index">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.TensorAxes.reverse_index">[docs]</a>
+    <span class="k">def</span> <span class="nf">reverse_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Computes the index of element ``key`` but rather than return a non-negative integer like</span>
+<span class="sd">        method ``index``, it returns a negative integer e.g., -1 if for the last element,</span>
+<span class="sd">        -2 for the penultimate element, ...</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key (T): any element present in ``self`` (which is an ordered set)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: negative integer corresponding to the position of ``key`` in ``self``</span>
+<span class="sd">                (starting from the last and decrementing by 1 for each element)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">))</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_first_mandatory_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_min_nb_dim</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor_min_nb_dim</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mandatory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedSet</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            OrderedSet[T]: ordered set of non-optional axes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">OrderedSet</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_first_mandatory_idx</span> <span class="p">:]))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">optional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedSet</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            OrderedSet[T]: ordered set of optional axes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">OrderedSet</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_mandatory_idx</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">| &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse_index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span><span class="si">}</span><span class="s2"> (optional): </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">optional</span><span class="p">]</span>
+            <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse_index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mandatory</span><span class="p">]</span>
+        <span class="p">)</span></div>
+
+
+
+<span class="n">ArrayType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;ArrayType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Array</span><span class="p">)</span>
+<span class="n">AxisType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;AxisType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Hashable</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="expand_dims_axis">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.expand_dims_axis">[docs]</a>
+<span class="k">def</span> <span class="nf">expand_dims_axis</span><span class="p">(</span>
+    <span class="n">tensor_axes</span><span class="p">:</span> <span class="n">TensorAxes</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span> <span class="n">missing_axes</span><span class="p">:</span> <span class="n">AbstractSet</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute ``axis`` argument to pass to ``numpy.expand_dims(a, axis)`` function when some axes in ``tensor_axes``</span>
+<span class="sd">    are not present in the numpy array ``a`` (they are &quot;flattened&quot;).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tensor_axes (TensorAxes[AxisType]): some array/tensor axes</span>
+<span class="sd">        missing_axes (AbstractSet[AxisType]): missing axes in the array/tensor</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: raises an error when ``missing_axes`` is not a subset of ``tensor_axes``</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[int, ...]: the ``axis`` argument to pass to ``numpy.expand_dims(a, axis)``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">missing_axes</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">tensor_axes</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The following missing axes are invalid: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">axis</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">missing_axes</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">tensor_axes</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Only the following axes are valid: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">axis</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">tensor_axes</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="n">tensor_axes</span><span class="o">.</span><span class="n">reverse_index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">tensor_axes</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">missing_axes</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="n">ArrayType_co</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;ArrayType_co&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Array</span><span class="p">,</span> <span class="n">covariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AverageableArrayLike">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.AverageableArrayLike">[docs]</a>
+<span class="k">class</span> <span class="nc">AverageableArrayLike</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">ArrayType_co</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Shared interface of all classes with a ``mean`` method return a scalar array (corresponding to the mean values of</span>
+<span class="sd">    the initial array).</span>
+
+<span class="sd">    Example of classes implementing this interface: (jax) numpy arrays, ...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AverageableArrayLike.mean">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.AverageableArrayLike.mean">[docs]</a>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayType_co</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            ArrayType_co: Should return a scalar array</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Tensor">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor">[docs]</a>
+<span class="nd">@runtime_checkable</span>
+<span class="k">class</span> <span class="nc">Tensor</span><span class="p">(</span><span class="n">DataclassInstance</span><span class="p">,</span> <span class="n">AverageableArrayLike</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">AxisType</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper for numpy/jax arrays with the following additional features:</span>
+
+<span class="sd">    - axes are &quot;named&quot; to facilitate manipulation and debugging (an axis &quot;name&quot; could be a string or any other</span>
+<span class="sd">      hashable ``AxisType``)</span>
+<span class="sd">    - the returned ``values`` of the tensor can be different from the actual ``array`` given as input at construction,</span>
+<span class="sd">      this allows to easily implement &quot;change of variables&quot; (a.k.a., &quot;substitution&quot;)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _tensor_axes (ClassVar[TensorAxes[AxisType]]): class attribute defining the axes of the ``array``</span>
+<span class="sd">        array (ArrayType): a (jax) numpy array containing all relevant data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_tensor_axes</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">TensorAxes</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]]</span>  <span class="c1"># type: ignore[misc]</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">ArrayType</span>
+    <span class="c1"># TODO: to facilitate vectorization with vmap, it could be convenient  # pylint: disable=W0511</span>
+    <span class="c1"># for the user to define an optional `values_axes` attribute (None by default).</span>
+    <span class="c1"># When not None, `values` property would basically perform a reshape of `array` attribute</span>
+    <span class="c1"># (permutation of axes). This would allow to put the `vectorized_axis` as the first axis in</span>
+    <span class="c1"># all input tensors of a vectorized method (see vectorization.py)</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_array</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Tensor.check_array">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.check_array">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the validity of the ``array`` attribute at construction.</span>
+<span class="sd">        To be overriden if needed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_ndim_in</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">tensor_min_nb_dim</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_tensor_axes</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>  <span class="c1"># type: ignore[call-arg]</span>
+
+<div class="viewcode-block" id="Tensor.getitem_from_axes">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.getitem_from_axes">[docs]</a>
+    <span class="k">def</span> <span class="nf">getitem_from_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes_keys</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Analogue of method ``__getitem__`` but where array slicing/indexing is explicitly applied to named axis.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axes_keys (Dict[AxisType, Any]): a mapping between axes names and slices/list of indices/...</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Self: a new ``Tensor`` of the same type with restricted data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">array_key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">axes_keys</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="k">if</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">axes_keys</span> <span class="k">else</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actual_axes</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">array_key</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+
+    <span class="k">def</span> <span class="fm">__abs__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg]</span>
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">AxisType</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">+</span> <span class="n">other</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">AxisType</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">-</span> <span class="n">other</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+
+    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">AxisType</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="n">other</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+
+    <span class="k">def</span> <span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">AxisType</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">/</span> <span class="n">other</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">/</span> <span class="n">other</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_expand_dims_axis</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">missing_axes</span><span class="p">:</span> <span class="n">AbstractSet</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="n">expand_dims_axis</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_tensor_axes</span><span class="p">,</span> <span class="n">missing_axes</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayType</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Override to apply transformations on ``self.array`` (&quot;change of variable&quot;).</span>
+
+<span class="sd">        For example, if one wants to manipulate (jax) tensors constrained to always have non-negative values in any</span>
+<span class="sd">        situation (even if the tensor gets updated by some gradient descent procedure for instance), then one can</span>
+<span class="sd">        override ``values`` by returning ``jax.nn.relu(self.array)``.</span>
+
+<span class="sd">        By default ``values`` implements the identity i.e., returns ``self.array``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ArrayType: the transformed ``array``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span>
+
+<div class="viewcode-block" id="Tensor.reverse_values">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.reverse_values">[docs]</a>
+    <span class="k">def</span> <span class="nf">reverse_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">ArrayType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayType</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inverse of the transformation implemented in ``values`` property.</span>
+
+<span class="sd">        By default, ``self.array = self.values`` so calling ``values`` is equivalent to calling ``array``.</span>
+
+<span class="sd">        When the transformation mapping ``array`` to ``values`` is not the identity, ``reverse_values`` should be</span>
+<span class="sd">        overriden accordingly.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            values (ArrayType): the output of property ``values``</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ArrayType: the array obtained by apply the inverse transformation of</span>
+<span class="sd">                ``values``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">values</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the type of ``self.values``&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">dtype</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the shape of ``self.values``&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of dimensions of ``self.values``&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ndim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">axes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorAxes</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Possible &quot;named&quot; axes of the tensor&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_tensor_axes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">actual_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorAxes</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Actual axes of the tensor&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TensorAxes</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="mi">0</span><span class="p">)],</span>
+            <span class="n">tensor_min_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">tensor_min_nb_dim</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Tensor.mean">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.mean">[docs]</a>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the mean on ``self.values`` on specified axes&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tensor.mean_over_axes">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.mean_over_axes">[docs]</a>
+    <span class="k">def</span> <span class="nf">mean_over_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">AbstractSet</span><span class="p">[</span><span class="n">AxisType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Averages ``values`` along one or several named axes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axes (AbstractSet[AxisType]): axes along which the means are computed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[ArrayType, Any]: new array containing the mean ``values``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axes_to_mean_over</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actual_axes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">axes</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axes_to_mean_over</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tensor.sum">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.sum">[docs]</a>
+    <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the sum of the array&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tensor.sum_over_axes">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.sum_over_axes">[docs]</a>
+    <span class="k">def</span> <span class="nf">sum_over_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">AbstractSet</span><span class="p">[</span><span class="n">AxisType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sums ``values`` along one or several named axes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axes (AbstractSet[AxisType]): axes along which the sums are computed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[ArrayType, Any]: new array containing the summed ``values``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axes_to_mean_over</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actual_axes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">axes</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axes_to_mean_over</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tensor.has">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.has">[docs]</a>
+    <span class="k">def</span> <span class="nf">has</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">AxisType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether ``axis`` is one of the possible axes of the tensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (AxisType): a &quot;named&quot; axis</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: ``True`` if ``axis`` is one of the possible axes of the tensor, ``False`` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span></div>
+
+
+<div class="viewcode-block" id="Tensor.has_actual">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.has_actual">[docs]</a>
+    <span class="k">def</span> <span class="nf">has_actual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">AxisType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether ``axis`` is one of the actual axes of the tensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (AxisType): a &quot;named&quot; axis</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: ``True`` if ``axis`` is one of the actual axes of the tensor, ``False`` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actual_axes</span></div>
+
+
+<div class="viewcode-block" id="Tensor.index">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.index">[docs]</a>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">AxisType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index of ``axis`` in tensor i.e., returns  ``i`` if and only if ``axis`` is the ``i``-th</span>
+<span class="sd">        dimension of the tensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (AxisType): a &quot;named&quot; axis</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: the corresponding index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">actual_axes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tensor.reverse_index">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.reverse_index">[docs]</a>
+    <span class="k">def</span> <span class="nf">reverse_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">AxisType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index of ``axis`` in tensor but in reverse order i.e., returns  ``-i`` if and only if</span>
+<span class="sd">        ``axis`` is the ``(n - i)``-th dimension of the tensor (with ``n`` the total number of dimension).</span>
+<span class="sd">        dimension of the tensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (AxisType): a &quot;named&quot; axis</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: the corresponding index in reverse order</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">actual_axes</span><span class="o">.</span><span class="n">reverse_index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tensor.size">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.size">[docs]</a>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">axis</span><span class="p">:</span> <span class="n">AxisType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The size of a given ``axis``. Returns 0 when the ``axis`` is &quot;flattened&quot;.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (AxisType): a &quot;named&quot; axis</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: if ``axis`` is not a possible axis</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: the size of ``axis`` (0 when the ``axis`` is &quot;flattened&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">axis</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2"> is not a valid axis.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Valid axes are: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_actual</span><span class="p">(</span><span class="n">axis</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">reverse_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reverse_index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">reverse_idx</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Tensor.is_broadcastable_with">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.Tensor.is_broadcastable_with">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_broadcastable_with</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other_tensor_or_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">AxisType</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether this tensor can be</span>
+<span class="sd">        `broadcasted &lt;https://numpy.org/doc/stable/user/basics.broadcasting.html&gt;`_</span>
+<span class="sd">        with ``other_tensor_or_shape``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other_tensor_or_shape (Union[Tensor[ArrayType, AxisType], Tuple[int, ...]]): another</span>
+<span class="sd">                tensor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: ``True`` if and only if this tensor can be broadcasted with ``other_tensor_or_shape``,</span>
+<span class="sd">                ``False`` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">is_broadcastable</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="n">other_tensor_or_shape</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_tensor_or_shape</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">other_tensor_or_shape</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RegularizedArrayLikeCost">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.RegularizedArrayLikeCost">[docs]</a>
+<span class="k">class</span> <span class="nc">RegularizedArrayLikeCost</span><span class="p">(</span><span class="n">AverageableArrayLike</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">],</span> <span class="n">Protocol</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for &quot;regularized&quot; costs i.e., costs of the form:</span>
+<span class="sd">    ``cost + lagrangian_coefficient * regularization``</span>
+
+<span class="sd">    `More about regularization &lt;https://en.wikipedia.org/wiki/Regularization_(mathematics)&gt;`_.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cost (AverageableArrayLike[ArrayType]): an array-like collection of costs</span>
+<span class="sd">        regularization (AverageableArrayLike[ArrayType]): an array-like collection regularization costs</span>
+<span class="sd">        lagrangian_coefficient (Number): a non-negative number quantifying the regularization weight</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cost</span><span class="p">:</span> <span class="n">AverageableArrayLike</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">]</span>
+    <span class="n">regularization</span><span class="p">:</span> <span class="n">AverageableArrayLike</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">]</span>
+    <span class="n">lagrangian_coefficient</span><span class="p">:</span> <span class="n">Number</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># type: ignore[assignment]</span>
+
+<div class="viewcode-block" id="RegularizedArrayLikeCost.mean">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.common_tensor.RegularizedArrayLikeCost.mean">[docs]</a>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayType</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularization</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lagrangian_coefficient</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AI-Helpers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

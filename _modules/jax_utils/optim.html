@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jax_utils.optim &mdash; AI Helpers Jax Utils 0.1.0a0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=edcd63a1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2E68D9" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                0.1.0a0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../_api/modules.html">jax-utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2E68D9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AI Helpers Jax Utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">jax_utils.optim</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for jax_utils.optim</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Classes and methods to optimize functions involving jax arrays transformations via gradient descent&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">UserList</span><span class="p">,</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">replace</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Deque</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">import</span> <span class="nn">jax_dataclasses</span> <span class="k">as</span> <span class="nn">jdc</span>
+<span class="kn">import</span> <span class="nn">optax</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">tqdm.autonotebook</span> <span class="kn">import</span> <span class="n">trange</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
+
+<span class="kn">from</span> <span class="nn">jax_utils.compilation</span> <span class="kn">import</span> <span class="n">BaseJaxCompilable</span><span class="p">,</span> <span class="n">jit_when_compilation_enabled</span>
+<span class="kn">from</span> <span class="nn">jax_utils.gradient</span> <span class="kn">import</span> <span class="n">BaseGradientStep</span>
+<span class="kn">from</span> <span class="nn">jax_utils.jax_tensor</span> <span class="kn">import</span> <span class="n">AverageableJaxArrayLike</span><span class="p">,</span> <span class="n">JaxTensor</span>
+
+<span class="n">State</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">)</span>
+<span class="n">Action</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Action&quot;</span><span class="p">)</span>
+<span class="n">Observation</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Observation&quot;</span><span class="p">)</span>
+<span class="n">Cost</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Cost&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">AverageableJaxArrayLike</span><span class="p">)</span>
+<span class="n">JaxTensorType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;JaxTensorType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">JaxTensor</span><span class="p">)</span>
+<span class="n">OptimizerState</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;OptimizerState&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">optax</span><span class="o">.</span><span class="n">OptState</span><span class="p">)</span>
+<span class="n">AxisType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;AxisType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Hashable</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="OptimizationState">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimizationState">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">OptimizationState</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The current state of an iterative optimization procedure involving the</span>
+<span class="sd">    :class:`jax_utils.markov_decision_process.Dynamics`</span>
+<span class="sd">    of a Markov Decision Process (typically a cost minimization).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        iteration (int): the current iteration step</span>
+<span class="sd">        state (State): the MDP state</span>
+<span class="sd">        action (Action): the MDP current action</span>
+<span class="sd">        cost (Optional[Cost], optional): the current cost associated to the state-action pair. Defaults to None.</span>
+<span class="sd">        optimizer_state (Optional[OptimizerState], optional): The current ``optax.OptState``. Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">State</span>
+    <span class="n">action</span><span class="p">:</span> <span class="n">Action</span>
+    <span class="n">cost</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Cost</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">optimizer_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OptimizerState</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scalar_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the average ``self.cost``</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: average cost</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="OptimStoppingCondition">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingCondition">[docs]</a>
+<span class="k">class</span> <span class="nc">OptimStoppingCondition</span><span class="p">(</span><span class="n">BaseJaxCompilable</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for all stopping conditions of an iterative optimization procedure involving the</span>
+<span class="sd">    :class:`jax_utils.markov_decision_process.Dynamics` of a Markov Decision Process (typically a cost minimization).</span>
+
+<span class="sd">    The stopping condition depends on an ``OptimizationState`` provided as input but may</span>
+<span class="sd">    also collect information over steps.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="OptimStoppingCondition.stop">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingCondition.stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">optimization_state</span><span class="p">:</span> <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a boolean inidicating whether the optimization procedure should be stopped.</span>
+<span class="sd">        This class should be overriven in every concrete class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            optimization_state (OptimizationState[State, Action, Cost, OptimizerState]): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: `True`` if the optimization procedure should be stopped, `False`` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="OptimStoppingCondition.reset">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingCondition.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets the stopping condition to an initial configuration.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nb_iterations_upper_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;An upper bound on the maximal number of iterations. Default is 1e20.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e20</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__and__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">other_stopping_condition</span><span class="p">:</span> <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimStoppingConditionIntersection</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructs a stopping condition that stops if and only if both ``self`` AND ``other_stopping_condition``</span>
+<span class="sd">        stop.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other_stopping_condition (OptimStoppingCondition[State, Action, Cost, OptimizerState]): an other</span>
+<span class="sd">                stopping condition</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            OptimStoppingConditionIntersection: intersection of two stopping conditions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">OptimStoppingConditionIntersection</span><span class="p">(</span>
+            <span class="n">stopping_condition_1</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">stopping_condition_2</span><span class="o">=</span><span class="n">other_stopping_condition</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__or__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">other_stopping_condition</span><span class="p">:</span> <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimStoppingConditionUnion</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructs a stopping condition that stops if and only if any of ``self`` OR ``other_stopping_condition``</span>
+<span class="sd">        stops.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other_stopping_condition (OptimStoppingCondition[State, Action, Cost, OptimizerState]): an other</span>
+<span class="sd">                stopping condition</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            OptimStoppingConditionUnion: union of two stopping conditions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">OptimStoppingConditionUnion</span><span class="p">(</span>
+            <span class="n">stopping_condition_1</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">stopping_condition_2</span><span class="o">=</span><span class="n">other_stopping_condition</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="OptimStoppingConditionsCombination">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingConditionsCombination">[docs]</a>
+<span class="k">class</span> <span class="nc">OptimStoppingConditionsCombination</span><span class="p">(</span>
+    <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span> <span class="n">Protocol</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This interface represents the combination of 2 stopping conditions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stopping_condition_1 (OptimStoppingCondition[State, Action, Cost, OptimizerState]): a stopping condition</span>
+<span class="sd">        stopping_condition_2 (OptimStoppingCondition[State, Action, Cost, OptimizerState]): a stopping condition</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">stopping_condition_1</span><span class="p">:</span> <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="n">stopping_condition_2</span><span class="p">:</span> <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+
+<div class="viewcode-block" id="OptimStoppingConditionsCombination.enable_compilation">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingConditionsCombination.enable_compilation">[docs]</a>
+    <span class="k">def</span> <span class="nf">enable_compilation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="o">.</span><span class="n">enable_compilation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="o">.</span><span class="n">enable_compilation</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">enable_compilation</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="OptimStoppingConditionsCombination.disable_compilation">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingConditionsCombination.disable_compilation">[docs]</a>
+    <span class="k">def</span> <span class="nf">disable_compilation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="o">.</span><span class="n">disable_compilation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="o">.</span><span class="n">disable_compilation</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">disable_compilation</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="OptimStoppingConditionIntersection">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingConditionIntersection">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">OptimStoppingConditionIntersection</span><span class="p">(</span>
+    <span class="n">OptimStoppingConditionsCombination</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A combination of 2 stopping conditions using an &quot;AND&quot; operation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stopping_condition_1 (OptimStoppingCondition[State, Action, Cost, OptimizerState]): a stopping condition</span>
+<span class="sd">        stopping_condition_2 (OptimStoppingCondition[State, Action, Cost, OptimizerState]): a stopping condition</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">stopping_condition_1</span><span class="p">:</span> <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="n">stopping_condition_2</span><span class="p">:</span> <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+
+<div class="viewcode-block" id="OptimStoppingConditionIntersection.stop">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingConditionIntersection.stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">optimization_state</span><span class="p">:</span> <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span>
+            <span class="n">optimization_state</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">optimization_state</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OptimStoppingConditionIntersection.reset">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingConditionIntersection.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimStoppingConditionIntersection</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="p">)</span><span class="si">}</span><span class="s2"> &amp; </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nb_iterations_upper_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="o">.</span><span class="n">nb_iterations_upper_bound</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="o">.</span><span class="n">nb_iterations_upper_bound</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="OptimStoppingConditionUnion">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingConditionUnion">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">OptimStoppingConditionUnion</span><span class="p">(</span>
+    <span class="n">OptimStoppingConditionsCombination</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A combination of 2 stopping conditions using an &quot;OR&quot; operation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stopping_condition_1 (OptimStoppingCondition[State, Action, Cost, OptimizerState]): a stopping condition</span>
+<span class="sd">        stopping_condition_2 (OptimStoppingCondition[State, Action, Cost, OptimizerState]): a stopping condition</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">stopping_condition_1</span><span class="p">:</span> <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="n">stopping_condition_2</span><span class="p">:</span> <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+
+<div class="viewcode-block" id="OptimStoppingConditionUnion.stop">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingConditionUnion.stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">optimization_state</span><span class="p">:</span> <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">optimization_state</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span>
+            <span class="n">optimization_state</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OptimStoppingConditionUnion.reset">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.OptimStoppingConditionUnion.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimStoppingConditionUnion</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="p">)</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nb_iterations_upper_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_1</span><span class="o">.</span><span class="n">nb_iterations_upper_bound</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition_2</span><span class="o">.</span><span class="n">nb_iterations_upper_bound</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="MaxIterationsStoppingCondition">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MaxIterationsStoppingCondition">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">MaxIterationsStoppingCondition</span><span class="p">(</span><span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A stopping condition that stops when the number of iterations exceeds a given threshold.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        max_iterations (int): maximal number of iterations before the stopping condition is raised</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span>
+
+<div class="viewcode-block" id="MaxIterationsStoppingCondition.stop">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MaxIterationsStoppingCondition.stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">optimization_state</span><span class="p">:</span> <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">optimization_state</span><span class="o">.</span><span class="n">iteration</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iterations</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Maximum number of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iterations</span><span class="si">}</span><span class="s2"> iterations reached.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;MaxIterations(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iterations</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nb_iterations_upper_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iterations</span></div>
+
+
+
+<div class="viewcode-block" id="MinIterationsStoppingCondition">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MinIterationsStoppingCondition">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">MinIterationsStoppingCondition</span><span class="p">(</span><span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A stopping condition that continues as long as the number of iterations is below a given threshold.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        min_iterations (int): minimal number of iterations before the stopping condition is raised</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">min_iterations</span><span class="p">:</span> <span class="nb">int</span>
+
+<div class="viewcode-block" id="MinIterationsStoppingCondition.stop">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MinIterationsStoppingCondition.stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">optimization_state</span><span class="p">:</span> <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">optimization_state</span><span class="o">.</span><span class="n">iteration</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_iterations</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;MinIterations(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">min_iterations</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="MinDeltaActionStoppingCondition">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MinDeltaActionStoppingCondition">[docs]</a>
+<span class="nd">@jdc</span><span class="o">.</span><span class="n">pytree_dataclass</span>
+<span class="k">class</span> <span class="nc">MinDeltaActionStoppingCondition</span><span class="p">(</span>
+    <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">JaxTensorType</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stops when the action stops significantly changing (as defined by relative &amp; absolute tolerance).</span>
+<span class="sd">    The previous action is saved in memory to compare it to the new action.</span>
+
+<span class="sd">    The delta between previous and new action is then compared to absolute and relative tolerance i.e, the</span>
+<span class="sd">    stopping condition is raised when:</span>
+<span class="sd">    ``all(abs(new_action - previous_action) &lt;= absolute tolerance + relative_tolerance * maximum(abs(new_action),</span>
+<span class="sd">    abs(previous_action)))``</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        relative_tolerance (jnp.ndarray): relative tolerance for action variations. Default is 1e-6.</span>
+<span class="sd">        absolute_tolerance (jnp.ndarray): absolute tolerance for action variations. Default is 1e-6.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">relative_tolerance</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">absolute_tolerance</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">)</span>
+
+    <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">previous_action</span><span class="p">:</span> <span class="n">JaxTensorType</span><span class="p">,</span> <span class="n">new_action</span><span class="p">:</span> <span class="n">JaxTensorType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">delta_action</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">new_action</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">previous_action</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+            <span class="n">delta_action</span>
+            <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_tolerance</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">relative_tolerance</span>
+            <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">previous_action</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">new_action</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="MinDeltaActionStoppingCondition.stop">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MinDeltaActionStoppingCondition.stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">optimization_state</span><span class="p">:</span> <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">JaxTensorType</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">new_action</span> <span class="o">=</span> <span class="n">optimization_state</span><span class="o">.</span><span class="n">action</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">previous_action</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_previous_action&quot;</span><span class="p">)</span>
+            <span class="n">should_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="p">(</span><span class="n">previous_action</span><span class="p">,</span> <span class="n">new_action</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">should_stop</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_previous_action&quot;</span><span class="p">,</span> <span class="n">new_action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">should_stop</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Changes in action are below specified (absolute + relative) tolerance.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">should_stop</span></div>
+
+
+<div class="viewcode-block" id="MinDeltaActionStoppingCondition.reset">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MinDeltaActionStoppingCondition.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MinDeltaActionStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">JaxTensorType</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_previous_action&quot;</span><span class="p">):</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_previous_action&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MinDeltaCostStoppingCondition">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MinDeltaCostStoppingCondition">[docs]</a>
+<span class="nd">@jdc</span><span class="o">.</span><span class="n">pytree_dataclass</span>
+<span class="k">class</span> <span class="nc">MinDeltaCostStoppingCondition</span><span class="p">(</span>
+    <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stops when the cost stops significantly decreasing (as defined by relative &amp; absolute tolerance).</span>
+
+<span class="sd">    The ``window_length`` last cost values are saved in memory and the stopping condition is raised when the delta</span>
+<span class="sd">    between the min and max of these values is below a threshold i.e., when:</span>
+<span class="sd">    ``all(maximum(last_window_length_costs) - minimum(last_window_length_costs) &lt; absolute_tolerance +</span>
+<span class="sd">    relative_tolerance * minimum(last_window_length_costs))``</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        relative_tolerance (jnp.ndarray): relative tolerance for cost variations. Default is 1e-6.</span>
+<span class="sd">        absolute_tolerance (jnp.ndarray): absolute tolerance for cost variations. Default is 1e-6.</span>
+<span class="sd">        window_length (int): maximal length of the queue storing the past history of costs (costs older than</span>
+<span class="sd">            ``window_length`` time steps are discarded)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">relative_tolerance</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">absolute_tolerance</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">window_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">costs_queue</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">max_cost</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">costs_queue</span><span class="p">)</span>
+        <span class="n">min_cost</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">costs_queue</span><span class="p">)</span>
+        <span class="n">delta_cost</span> <span class="o">=</span> <span class="n">max_cost</span> <span class="o">-</span> <span class="n">min_cost</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+            <span class="n">delta_cost</span>
+            <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relative_tolerance</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">max_cost</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">min_cost</span><span class="p">))</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_tolerance</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="MinDeltaCostStoppingCondition.stop">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MinDeltaCostStoppingCondition.stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">optimization_state</span><span class="p">:</span> <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_costs_queue&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">costs_queue</span><span class="p">:</span> <span class="n">Deque</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_costs_queue&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">costs_queue</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_length</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">should_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">costs_queue</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">should_stop</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cost decrease is below specified (absolute + relative) tolerance.&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_costs_queue&quot;</span><span class="p">):</span>
+                <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_costs_queue&quot;</span><span class="p">,</span> <span class="n">deque</span><span class="p">())</span>
+            <span class="n">costs_queue</span><span class="p">:</span> <span class="n">Deque</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_costs_queue&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore[no-redef]</span>
+            <span class="k">if</span> <span class="n">optimization_state</span><span class="o">.</span><span class="n">cost</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">costs_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">optimization_state</span><span class="o">.</span><span class="n">cost</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">costs_queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_length</span><span class="p">:</span>
+                <span class="n">costs_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MinDeltaCostStoppingCondition.reset">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.MinDeltaCostStoppingCondition.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MinDeltaCostStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_costs_queue&quot;</span><span class="p">):</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_costs_queue&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CostHistory">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.CostHistory">[docs]</a>
+<span class="k">class</span> <span class="nc">CostHistory</span><span class="p">(</span><span class="n">UserList</span><span class="p">[</span><span class="n">AverageableJaxArrayLike</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List of costs (typically jax arrays)&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CostHistory.scalar_costs">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.CostHistory.scalar_costs">[docs]</a>
+    <span class="k">def</span> <span class="nf">scalar_costs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[float]: list of cost means</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">cost</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="k">for</span> <span class="n">cost</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="CostHistory.plot_scalar_costs">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.CostHistory.plot_scalar_costs">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_scalar_costs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots cost history&quot;&quot;&quot;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scalar_costs</span><span class="p">())</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Cost evolution over time&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Iterations&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Cost&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GradientDescentOptimizationLoop">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.GradientDescentOptimizationLoop">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">GradientDescentOptimizationLoop</span><span class="p">(</span>
+    <span class="n">Generic</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">Observation</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gradient descent optimization procedure involving the :class:`jax_utils.markov_decision_process.Dynamics`</span>
+<span class="sd">    of a Markov Decision Process. This class is a callable that recursively applies ``gradient_step`` until</span>
+<span class="sd">    a ``stopping_condition`` is met.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gradient_step (BaseGradientStep[AxisType, State, Action, Cost, OptimizerState]): a gradient step</span>
+<span class="sd">        stopping_condition (OptimStoppingCondition[State, Action, Cost, OptimizerState]): a stopping condition</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gradient_step</span><span class="p">:</span> <span class="n">BaseGradientStep</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="n">stopping_condition</span><span class="p">:</span> <span class="n">OptimStoppingCondition</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
+        <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
+        <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">cost</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Cost</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">opt_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OptimizerState</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+        <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
+        <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
+        <span class="n">CostHistory</span><span class="p">,</span>
+    <span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iteratively minimizes the cost of the MDP dynamics (in some state) by performing gradient descent</span>
+<span class="sd">        on the action.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state (State): state of the MDP (does not change during optimization)</span>
+<span class="sd">            init_action (Action): initial action that will then be optimized</span>
+<span class="sd">            iteration (int, optional): current  iteration. Defaults to 0.</span>
+<span class="sd">            cost (Optional[Cost], optional): current cost. Defaults to None.</span>
+<span class="sd">            opt_state (Optional[OptimizerState], optional): current optimization state. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[ OptimizationState[State, Action, Cost, OptimizerState], OptimizationState[State, Action, Cost, OptimizerState], CostHistory,]: the optimal `OptimizationState`, final `OptimizationState` and history o cost during the optimization iterations  # pylint: disable=line-too-long</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialization</span>
+        <span class="c1"># --------------------</span>
+        <span class="n">cost_history</span> <span class="o">=</span> <span class="n">CostHistory</span><span class="p">()</span>
+        <span class="n">opt_state</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gradient_step</span><span class="o">.</span><span class="n">init_optimizer</span><span class="p">(</span><span class="n">init_action</span><span class="p">)</span> <span class="k">if</span> <span class="n">opt_state</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">opt_state</span>
+        <span class="p">)</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">init_action</span>
+
+        <span class="n">optimization_state</span> <span class="o">=</span> <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">](</span>
+            <span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">,</span> <span class="n">cost</span><span class="o">=</span><span class="n">cost</span><span class="p">,</span> <span class="n">optimizer_state</span><span class="o">=</span><span class="n">opt_state</span>
+        <span class="p">)</span>
+        <span class="n">optimal_optimization_state</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">optimization_state</span><span class="p">)</span>
+
+        <span class="c1"># Optim loop</span>
+        <span class="c1"># --------------------</span>
+        <span class="n">pbar</span> <span class="o">=</span> <span class="n">trange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition</span><span class="o">.</span><span class="n">nb_iterations_upper_bound</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">pbar</span><span class="p">:</span>
+            <span class="n">action</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">cost_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_step</span><span class="p">(</span>
+                <span class="n">state</span><span class="p">,</span>
+                <span class="n">action</span><span class="p">,</span>
+                <span class="n">opt_state</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">cost_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cost_value</span><span class="p">)</span>
+            <span class="n">optimization_state</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span>
+                <span class="n">optimal_optimization_state</span><span class="p">,</span>
+                <span class="n">iteration</span><span class="o">=</span><span class="n">it</span><span class="p">,</span>
+                <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">,</span>
+                <span class="n">cost</span><span class="o">=</span><span class="n">cost_value</span><span class="p">,</span>
+                <span class="n">optimizer_state</span><span class="o">=</span><span class="n">opt_state</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">scalar_cost</span> <span class="o">=</span> <span class="n">optimization_state</span><span class="o">.</span><span class="n">scalar_cost</span>
+            <span class="n">pbar</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">({</span><span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="n">scalar_cost</span><span class="p">})</span>
+
+            <span class="k">if</span> <span class="n">scalar_cost</span> <span class="o">&lt;</span> <span class="n">optimal_optimization_state</span><span class="o">.</span><span class="n">scalar_cost</span><span class="p">:</span>
+                <span class="n">optimal_optimization_state</span> <span class="o">=</span> <span class="n">optimization_state</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_condition</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">optimization_state</span><span class="p">):</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">optimal_optimization_state</span><span class="p">,</span> <span class="n">optimization_state</span><span class="p">,</span> <span class="n">cost_history</span>
+
+<div class="viewcode-block" id="GradientDescentOptimizationLoop.resume">
+<a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.optim.GradientDescentOptimizationLoop.resume">[docs]</a>
+    <span class="k">def</span> <span class="nf">resume</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">optimization_state</span><span class="p">:</span> <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+        <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
+        <span class="n">OptimizationState</span><span class="p">[</span><span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
+        <span class="n">CostHistory</span><span class="p">,</span>
+    <span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resume optimization loop from ``optimization_state`` (cold start).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            optimization_state (OptimizationState[State, Action, Cost, OptimizerState]): state from which to resume the</span>
+<span class="sd">                optimization procedure.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            OptimizationState[State, Action, Cost, OptimizerState], OptimizationState[State, Action, Cost,OptimizerState], CostHistory,]: same outputs as :meth:`GradientDescentOptimizationLoop.__call__`  # pylint: disable=line-too-long</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">(</span>
+            <span class="n">state</span><span class="o">=</span><span class="n">optimization_state</span><span class="o">.</span><span class="n">state</span><span class="p">,</span>
+            <span class="n">init_action</span><span class="o">=</span><span class="n">optimization_state</span><span class="o">.</span><span class="n">action</span><span class="p">,</span>
+            <span class="n">iteration</span><span class="o">=</span><span class="n">optimization_state</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
+            <span class="n">cost</span><span class="o">=</span><span class="n">optimization_state</span><span class="o">.</span><span class="n">cost</span><span class="p">,</span>
+            <span class="n">opt_state</span><span class="o">=</span><span class="n">optimization_state</span><span class="o">.</span><span class="n">optimizer_state</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AI-Helpers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
