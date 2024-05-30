@@ -17,7 +17,7 @@
 You can install the `jax-utils` module via pip:
 
 ```bash
-pip install jax-utils
+pip install ai-helpers-jax-utils
 ```
 
 ## Getting Started
