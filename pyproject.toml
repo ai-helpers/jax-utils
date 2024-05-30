@@ -5,6 +5,12 @@ description = "Common jax utils"
 authors = ["Corentin Vasseur <vasseur.corentin@gmail.com>"]
 packages = [{ include = "jax_utils" }]
 readme = "README.md"
+repository = "https://github.com/ai-helpers/jax-utils"
+documentation = "https://ai-helpers.github.io/jax-utils/"
+keywords = ["machine-learning", "jax", "utils"]
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.11"
