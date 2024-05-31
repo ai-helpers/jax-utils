@@ -1,5 +1,9 @@
 # AI Helpers - Jax Utils
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ai-helpers_jax-utils&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ai-helpers_jax-utils)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ai-helpers_jax-utils&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ai-helpers_jax-utils)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ai-helpers_jax-utils&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ai-helpers_jax-utils)
+
 `jax-utils` is a Python module that provides a collection of utilities to simplify and enhance the use of JAX. These utilities are designed to make working with JAX more efficient and to reduce boilerplate code.
 
 ## Table of Contents
