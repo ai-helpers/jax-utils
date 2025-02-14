@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jax_utils.gradient &mdash; AI Helpers Jax Utils 0.1.0a1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>jax_utils.gradient &mdash; AI Helpers Jax Utils 0.1.0a2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
 
   
@@ -14,7 +14,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=49b5e7b8"></script>
+        <script src="../../_static/documentation_options.js?v=7e4d6dd2"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
             
           </a>
               <div class="version">
-                0.1.0a1
+                0.1.0a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -76,17 +76,17 @@
   <h1>Source code for jax_utils.gradient</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Classes and methods to compute the gradient of functions involving jax arrays transformations&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="kn">import</span> <span class="nn">jax_dataclasses</span> <span class="k">as</span> <span class="nn">jdc</span>
-<span class="kn">import</span> <span class="nn">optax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax_dataclasses</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jdc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">optax</span>
 
-<span class="kn">from</span> <span class="nn">jax_utils.compilation</span> <span class="kn">import</span> <span class="n">jit_when_compilation_enabled</span>
-<span class="kn">from</span> <span class="nn">jax_utils.dynamics</span> <span class="kn">import</span> <span class="n">JaxDynamics</span>
-<span class="kn">from</span> <span class="nn">jax_utils.jax_tensor</span> <span class="kn">import</span> <span class="n">AverageableJaxArrayLike</span>
-<span class="kn">from</span> <span class="nn">jax_utils.vectorization</span> <span class="kn">import</span> <span class="n">JaxDataclassNestedConvertibleToAxes</span><span class="p">,</span> <span class="n">vectorize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.compilation</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit_when_compilation_enabled</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.dynamics</span><span class="w"> </span><span class="kn">import</span> <span class="n">JaxDynamics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.jax_tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">AverageableJaxArrayLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.vectorization</span><span class="w"> </span><span class="kn">import</span> <span class="n">JaxDataclassNestedConvertibleToAxes</span><span class="p">,</span> <span class="n">vectorize</span>
 
 <span class="n">State</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">)</span>
 <span class="n">State_contra</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;State_contra&quot;</span><span class="p">,</span> <span class="n">contravariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -101,7 +101,7 @@
 
 <div class="viewcode-block" id="BaseGradientStep">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.BaseGradientStep">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseGradientStep</span><span class="p">(</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseGradientStep</span><span class="p">(</span>
     <span class="n">JaxDataclassNestedConvertibleToAxes</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">],</span>
     <span class="n">Protocol</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">,</span> <span class="n">State_contra</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
 <span class="p">):</span>
@@ -111,13 +111,13 @@
     <span class="c1"># pylint: disable=C0116</span>
 <div class="viewcode-block" id="BaseGradientStep.init_optimizer">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.BaseGradientStep.init_optimizer">[docs]</a>
-    <span class="k">def</span> <span class="nf">init_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizerState</span><span class="p">:</span> <span class="o">...</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizerState</span><span class="p">:</span> <span class="o">...</span></div>
 
 
     <span class="c1"># pylint: disable=C0116</span>
 <div class="viewcode-block" id="BaseGradientStep.compute_gradient">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.BaseGradientStep.compute_gradient">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_gradient</span><span class="p">(</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_gradient</span><span class="p">(</span></div>
 
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">state</span><span class="p">:</span> <span class="n">State_contra</span><span class="p">,</span>
@@ -127,12 +127,12 @@
     <span class="c1"># pylint: disable=C0116</span>
 <div class="viewcode-block" id="BaseGradientStep.update">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.BaseGradientStep.update">[docs]</a>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span></div>
 
         <span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">:</span> <span class="n">GradientUpdates</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">:</span> <span class="n">OptimizerState</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span> <span class="o">...</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">state</span><span class="p">:</span> <span class="n">State_contra</span><span class="p">,</span>
         <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
@@ -144,7 +144,7 @@
 <div class="viewcode-block" id="GradientStep">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.GradientStep">[docs]</a>
 <span class="nd">@jdc</span><span class="o">.</span><span class="n">pytree_dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">GradientStep</span><span class="p">(</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GradientStep</span><span class="p">(</span>
     <span class="n">BaseGradientStep</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
     <span class="n">Generic</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">Observation_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">],</span>
 <span class="p">):</span>
@@ -163,7 +163,7 @@
 <div class="viewcode-block" id="GradientStep.init_optimizer">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.GradientStep.init_optimizer">[docs]</a>
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">init_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizerState</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizerState</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize optimizer</span>
 
 <span class="sd">        Args:</span>
@@ -178,7 +178,7 @@
 <div class="viewcode-block" id="GradientStep.compute_gradient">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.GradientStep.compute_gradient">[docs]</a>
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">compute_gradient</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_gradient</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
         <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
@@ -202,7 +202,7 @@
 <div class="viewcode-block" id="GradientStep.update">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.GradientStep.update">[docs]</a>
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">:</span> <span class="n">GradientUpdates</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">:</span> <span class="n">OptimizerState</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the action and optimizer state</span>
@@ -221,7 +221,7 @@
 
 
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
         <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
@@ -250,7 +250,7 @@
 <div class="viewcode-block" id="VectorizedGradientStep">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.VectorizedGradientStep">[docs]</a>
 <span class="nd">@jdc</span><span class="o">.</span><span class="n">pytree_dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">VectorizedGradientStep</span><span class="p">(</span><span class="n">BaseGradientStep</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">VectorizedGradientStep</span><span class="p">(</span><span class="n">BaseGradientStep</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Action</span><span class="p">,</span> <span class="n">Cost_co</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A gradient step that is `vectorized &lt;https://jax.readthedocs.io/en/latest/jax-101/03-vectorization.html&gt;`_ on a</span>
 <span class="sd">    specific axis</span>
 
@@ -266,14 +266,14 @@
 <div class="viewcode-block" id="VectorizedGradientStep.init_optimizer">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.VectorizedGradientStep.init_optimizer">[docs]</a>
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">init_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizerState</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_action</span><span class="p">:</span> <span class="n">Action</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizerState</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_step</span><span class="o">.</span><span class="n">init_optimizer</span><span class="p">(</span><span class="n">init_action</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="VectorizedGradientStep.compute_gradient">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.VectorizedGradientStep.compute_gradient">[docs]</a>
     <span class="nd">@vectorize</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">compute_gradient</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_gradient</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
         <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>
@@ -287,14 +287,14 @@
 <div class="viewcode-block" id="VectorizedGradientStep.update">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.gradient.VectorizedGradientStep.update">[docs]</a>
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">:</span> <span class="n">GradientUpdates</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">:</span> <span class="n">OptimizerState</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Action</span><span class="p">,</span> <span class="n">OptimizerState</span><span class="p">]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_step</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">gradient_value</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">)</span></div>
 
 
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
         <span class="n">action</span><span class="p">:</span> <span class="n">Action</span><span class="p">,</span>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jax_utils.tranform &mdash; AI Helpers Jax Utils 0.1.0a1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>jax_utils.tranform &mdash; AI Helpers Jax Utils 0.1.0a2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
 
   
@@ -14,7 +14,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=49b5e7b8"></script>
+        <script src="../../_static/documentation_options.js?v=7e4d6dd2"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
             
           </a>
               <div class="version">
-                0.1.0a1
+                0.1.0a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -76,24 +76,24 @@
   <h1>Source code for jax_utils.tranform</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Jax arrays transformations (scaling, ...)&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
-<span class="kn">import</span> <span class="nn">jax_dataclasses</span> <span class="k">as</span> <span class="nn">jdc</span>
-<span class="kn">from</span> <span class="nn">jax.tree_util</span> <span class="kn">import</span> <span class="n">tree_map</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax_dataclasses</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jdc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax.tree_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">tree_map</span>
 
-<span class="kn">from</span> <span class="nn">jax_utils.compilation</span> <span class="kn">import</span> <span class="n">BaseJaxCompilable</span><span class="p">,</span> <span class="n">jit_when_compilation_enabled</span>
-<span class="kn">from</span> <span class="nn">jax_utils.jax_tensor</span> <span class="kn">import</span> <span class="n">JaxTensor</span>
-<span class="kn">from</span> <span class="nn">jax_utils.common_tensor</span> <span class="kn">import</span> <span class="n">TensorAxes</span><span class="p">,</span> <span class="n">expand_dims_axis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.compilation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseJaxCompilable</span><span class="p">,</span> <span class="n">jit_when_compilation_enabled</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.jax_tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">JaxTensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.common_tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">TensorAxes</span><span class="p">,</span> <span class="n">expand_dims_axis</span>
 
 <span class="n">AxisType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;AxisType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Hashable</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="scale_jax_tensor">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.tranform.scale_jax_tensor">[docs]</a>
-<span class="k">def</span> <span class="nf">scale_jax_tensor</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">scale_jax_tensor</span><span class="p">(</span>
     <span class="n">tensor</span><span class="p">:</span> <span class="n">JaxTensor</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span> <span class="n">scaling_factor</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JaxTensor</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scale the ``values`` of a ``JaxTensor`` i.e., multiply ``values`` by ``scaling_factor``.</span>
@@ -114,7 +114,7 @@
 
 <div class="viewcode-block" id="unscale_jax_tensor">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.tranform.unscale_jax_tensor">[docs]</a>
-<span class="k">def</span> <span class="nf">unscale_jax_tensor</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unscale_jax_tensor</span><span class="p">(</span>
     <span class="n">scaled_tensor</span><span class="p">:</span> <span class="n">JaxTensor</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span> <span class="n">scaling_factor</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JaxTensor</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reverse transformation of function ``scale_jax_tensor``.</span>
@@ -135,7 +135,7 @@
 <div class="viewcode-block" id="JaxScaler">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.tranform.JaxScaler">[docs]</a>
 <span class="nd">@jdc</span><span class="o">.</span><span class="n">pytree_dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">JaxScaler</span><span class="p">(</span><span class="n">BaseJaxCompilable</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">JaxScaler</span><span class="p">(</span><span class="n">BaseJaxCompilable</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;When applying gradient descent optimization algorithms, it is often helpful to scale all the arrays/tensors</span>
 <span class="sd">    involved in the computations.</span>
 
@@ -157,7 +157,7 @@
     <span class="n">tensor_types_to_scale</span><span class="p">:</span> <span class="n">jdc</span><span class="o">.</span><span class="n">Static</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">JaxTensor</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">JaxTensor</span><span class="p">,)</span>
     <span class="n">tensor_types_not_to_scale</span><span class="p">:</span> <span class="n">jdc</span><span class="o">.</span><span class="n">Static</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">JaxTensor</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>  <span class="c1"># type: ignore[assignment]</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_factors</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_axes</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;the number of scaling_axes should math the number of dimensions of scaling_factors&quot;</span>
@@ -170,7 +170,7 @@
 <div class="viewcode-block" id="JaxScaler.from_tensor">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.tranform.JaxScaler.from_tensor">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_tensor</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_tensor</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">tensor</span><span class="p">:</span> <span class="n">JaxTensor</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span>
         <span class="n">scaling_axes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span>
@@ -210,7 +210,7 @@
 <div class="viewcode-block" id="JaxScaler.scale">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.tranform.JaxScaler.scale">[docs]</a>
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pytree</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pytree</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Scales any pytree containing :class:`jax_utils.jax_tensor.JaxTensor`&#39;s</span>
 
 <span class="sd">        Args:</span>
@@ -239,7 +239,7 @@
 <div class="viewcode-block" id="JaxScaler.unscale">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.tranform.JaxScaler.unscale">[docs]</a>
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">unscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled_pytree</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled_pytree</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unscales any pytree containing :class:`jax_utils.jax_tensor.JaxTensor`&#39;s (reverse</span>
 <span class="sd">        transformation of method ``scale``).</span>
 
@@ -269,7 +269,7 @@
 <div class="viewcode-block" id="JaxScaler.expand_scaling_factors">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.tranform.JaxScaler.expand_scaling_factors">[docs]</a>
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">expand_scaling_factors</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">expand_scaling_factors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">tensor_axes</span><span class="p">:</span> <span class="n">TensorAxes</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span> <span class="n">missing_axes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Expands the dimensions of ``self.scaling_factors`` to match the ``tensor_axes`` given as inputs.</span>

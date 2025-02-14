@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jax_utils.vectorization &mdash; AI Helpers Jax Utils 0.1.0a1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>jax_utils.vectorization &mdash; AI Helpers Jax Utils 0.1.0a2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
 
   
@@ -14,7 +14,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=49b5e7b8"></script>
+        <script src="../../_static/documentation_options.js?v=7e4d6dd2"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
             
           </a>
               <div class="version">
-                0.1.0a1
+                0.1.0a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -76,24 +76,24 @@
   <h1>Source code for jax_utils.vectorization</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Classes and methods to easily vectorize jax tensors&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">runtime_checkable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">runtime_checkable</span>
 
-<span class="kn">import</span> <span class="nn">jax_dataclasses</span> <span class="k">as</span> <span class="nn">jdc</span>
-<span class="kn">import</span> <span class="nn">optax</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">vmap</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax_dataclasses</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jdc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">optax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">vmap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
-<span class="kn">from</span> <span class="nn">jax_utils.compilation</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.compilation</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BaseJaxCompilable</span><span class="p">,</span>
     <span class="n">JaxCompilableProtocol</span><span class="p">,</span>
     <span class="n">jit_when_compilation_enabled</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">jax_utils.pytree</span> <span class="kn">import</span> <span class="n">ConvertibleToAxes</span><span class="p">,</span> <span class="n">pytree_to_axes</span>
-<span class="kn">from</span> <span class="nn">jax_utils.jax_tensor</span> <span class="kn">import</span> <span class="n">AverageableJaxArrayLike</span>
-<span class="kn">from</span> <span class="nn">jax_utils.typing</span> <span class="kn">import</span> <span class="n">DataclassInstance</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.pytree</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConvertibleToAxes</span><span class="p">,</span> <span class="n">pytree_to_axes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.jax_tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">AverageableJaxArrayLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataclassInstance</span>
 
 <span class="n">State</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">)</span>
 <span class="n">Action_contra</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Action_contra&quot;</span><span class="p">,</span> <span class="n">contravariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -108,7 +108,7 @@
 <div class="viewcode-block" id="JaxVectorizableProtocol">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.vectorization.JaxVectorizableProtocol">[docs]</a>
 <span class="nd">@runtime_checkable</span>
-<span class="k">class</span> <span class="nc">JaxVectorizableProtocol</span><span class="p">(</span><span class="n">JaxCompilableProtocol</span><span class="p">,</span> <span class="n">ConvertibleToAxes</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span> <span class="n">Protocol</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">JaxVectorizableProtocol</span><span class="p">(</span><span class="n">JaxCompilableProtocol</span><span class="p">,</span> <span class="n">ConvertibleToAxes</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span> <span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for classes manipulating JAX arrays. It defines a special attribute ``vectorized_axis``</span>
 <span class="sd">    corresponding to the &quot;named&quot; axis over which to apply</span>
 <span class="sd">    `vectorization &lt;https://jax.readthedocs.io/en/latest/jax-101/03-vectorization.html&gt;`_.</span>
@@ -127,7 +127,7 @@
 
 <div class="viewcode-block" id="vectorize">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.vectorization.vectorize">[docs]</a>
-<span class="k">def</span> <span class="nf">vectorize</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">vectorize</span><span class="p">(</span>
     <span class="n">in_default_axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">out_default_axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">],</span> <span class="n">Callable</span><span class="p">]:</span>
@@ -160,9 +160,9 @@
 <span class="sd">        Callable[[Callable], Callable]: decorator with parameters ``in_default_axis`` and ``out_default_axis`` specified</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
         <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">JaxVectorizableProtocol</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">JaxVectorizableProtocol</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_vmap_functions&quot;</span><span class="p">):</span>
                 <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_vmap_functions&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
@@ -193,7 +193,7 @@
 <div class="viewcode-block" id="JaxDataclassNestedConvertibleToAxes">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.vectorization.JaxDataclassNestedConvertibleToAxes">[docs]</a>
 <span class="nd">@runtime_checkable</span>
-<span class="k">class</span> <span class="nc">JaxDataclassNestedConvertibleToAxes</span><span class="p">(</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">JaxDataclassNestedConvertibleToAxes</span><span class="p">(</span>
     <span class="n">DataclassInstance</span><span class="p">,</span>
     <span class="n">ConvertibleToAxes</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">],</span>
     <span class="n">BaseJaxCompilable</span><span class="p">,</span>
@@ -205,7 +205,7 @@
 
 <div class="viewcode-block" id="JaxDataclassNestedConvertibleToAxes.convert_to_axes">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.vectorization.JaxDataclassNestedConvertibleToAxes.convert_to_axes">[docs]</a>
-    <span class="k">def</span> <span class="nf">convert_to_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_to_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Concrete implementation of ``convert_to_axes`` for dataclasses.</span>
 <span class="sd">        All the fields of the dataclass are inspected and method ``convert_to_axes``</span>
 <span class="sd">        is applied whenever the field is ``ConvertibleToAxes``.</span>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jax_utils.pytree &mdash; AI Helpers Jax Utils 0.1.0a1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>jax_utils.pytree &mdash; AI Helpers Jax Utils 0.1.0a2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
 
   
@@ -14,7 +14,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=49b5e7b8"></script>
+        <script src="../../_static/documentation_options.js?v=7e4d6dd2"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
             
           </a>
               <div class="version">
-                0.1.0a1
+                0.1.0a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -76,10 +76,10 @@
   <h1>Source code for jax_utils.pytree</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Classes and methods to easily map pytrees to axes (e.g., for vectorization)&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">runtime_checkable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">runtime_checkable</span>
 
-<span class="kn">from</span> <span class="nn">jax.tree_util</span> <span class="kn">import</span> <span class="n">tree_map</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax.tree_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">tree_map</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
 <span class="n">AxisType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;AxisType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Hashable</span><span class="p">)</span>
 <span class="n">AxisType_contra</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;AxisType_contra&quot;</span><span class="p">,</span> <span class="n">contravariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -89,10 +89,10 @@
 <div class="viewcode-block" id="ConvertibleToAxes">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.pytree.ConvertibleToAxes">[docs]</a>
 <span class="nd">@runtime_checkable</span>
-<span class="k">class</span> <span class="nc">ConvertibleToAxes</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConvertibleToAxes</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">]):</span>
 <div class="viewcode-block" id="ConvertibleToAxes.convert_to_axes">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.pytree.ConvertibleToAxes.convert_to_axes">[docs]</a>
-    <span class="k">def</span> <span class="nf">convert_to_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_to_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AxisType_contra</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an object that can be used in argument ``in_axes`` or ``out_axes`` of</span>
 <span class="sd">        `jax.vmap &lt;https://jax.readthedocs.io/en/latest/_autosummary/jax.vmap.html&gt;`_</span>
@@ -111,7 +111,7 @@
 
 <div class="viewcode-block" id="pytree_to_axes">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.pytree.pytree_to_axes">[docs]</a>
-<span class="k">def</span> <span class="nf">pytree_to_axes</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pytree_to_axes</span><span class="p">(</span>
     <span class="n">pytree</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">vectorized_axis</span><span class="p">:</span> <span class="n">AxisType</span><span class="p">,</span> <span class="n">default_axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>

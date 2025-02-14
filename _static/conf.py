@@ -23,7 +23,7 @@ copyright = "2024, AI-Helpers"
 author = "AI-Helpers Team"
 
 # The full version, including alpha/beta/rc tags
-version = "0.1.0a1"
+version = "0.1.0a2"
 release = version
 
 # -- General configuration ---------------------------------------------------

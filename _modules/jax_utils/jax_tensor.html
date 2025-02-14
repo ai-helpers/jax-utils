@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jax_utils.jax_tensor &mdash; AI Helpers Jax Utils 0.1.0a1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>jax_utils.jax_tensor &mdash; AI Helpers Jax Utils 0.1.0a2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
 
   
@@ -14,7 +14,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=49b5e7b8"></script>
+        <script src="../../_static/documentation_options.js?v=7e4d6dd2"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
             
           </a>
               <div class="version">
-                0.1.0a1
+                0.1.0a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -76,8 +76,8 @@
   <h1>Source code for jax_utils.jax_tensor</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Wrappers around jax arrays&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AbstractSet</span><span class="p">,</span>
     <span class="n">Generic</span><span class="p">,</span>
     <span class="n">Hashable</span><span class="p">,</span>
@@ -90,14 +90,14 @@
     <span class="n">runtime_checkable</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
-<span class="kn">import</span> <span class="nn">jax_dataclasses</span> <span class="k">as</span> <span class="nn">jdc</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">nn</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax_dataclasses</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jdc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
-<span class="kn">from</span> <span class="nn">jax_utils.compilation</span> <span class="kn">import</span> <span class="n">BaseJaxCompilable</span><span class="p">,</span> <span class="n">jit_when_compilation_enabled</span>
-<span class="kn">from</span> <span class="nn">jax_utils.pytree</span> <span class="kn">import</span> <span class="n">ConvertibleToAxes</span>
-<span class="kn">from</span> <span class="nn">jax_utils.common_tensor</span> <span class="kn">import</span> <span class="n">AverageableArrayLike</span><span class="p">,</span> <span class="n">RegularizedArrayLikeCost</span><span class="p">,</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.compilation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseJaxCompilable</span><span class="p">,</span> <span class="n">jit_when_compilation_enabled</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.pytree</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConvertibleToAxes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax_utils.common_tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">AverageableArrayLike</span><span class="p">,</span> <span class="n">RegularizedArrayLikeCost</span><span class="p">,</span> <span class="n">Tensor</span>
 
 <span class="n">AxisType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;AxisType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Hashable</span><span class="p">)</span>
 
@@ -105,7 +105,7 @@
 <div class="viewcode-block" id="JaxTensor">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.JaxTensor">[docs]</a>
 <span class="nd">@runtime_checkable</span>
-<span class="k">class</span> <span class="nc">JaxTensor</span><span class="p">(</span><span class="n">Tensor</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">AxisType</span><span class="p">],</span> <span class="n">ConvertibleToAxes</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span> <span class="n">Protocol</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">JaxTensor</span><span class="p">(</span><span class="n">Tensor</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">AxisType</span><span class="p">],</span> <span class="n">ConvertibleToAxes</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span> <span class="n">Protocol</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface representing a ``Tensor`` with a</span>
 <span class="sd">    `JAX &lt;https://jax.readthedocs.io/en/latest/_autosummary/jax.numpy.array.html&gt;`_ ``array``.</span>
 
@@ -127,11 +127,11 @@
 
     <span class="n">array</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">array</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="c1"># in case the class is instantiated as a PyTreeDef (e.g., for vmap),</span>
             <span class="c1"># self.array may be an int, None, ...</span>
@@ -139,7 +139,7 @@
 
 <div class="viewcode-block" id="JaxTensor.is_broadcastable_with">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.JaxTensor.is_broadcastable_with">[docs]</a>
-    <span class="k">def</span> <span class="nf">is_broadcastable_with</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_broadcastable_with</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">other_tensor_or_shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tensor</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">AxisType</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -153,7 +153,7 @@
 <div class="viewcode-block" id="JaxTensor.from_flattened_axes">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.JaxTensor.from_flattened_axes">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_flattened_axes</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_flattened_axes</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">flattened_axes</span><span class="p">:</span> <span class="n">AbstractSet</span><span class="p">[</span><span class="n">AxisType</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -175,7 +175,7 @@
 
 <div class="viewcode-block" id="JaxTensor.convert_to_axes">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.JaxTensor.convert_to_axes">[docs]</a>
-    <span class="k">def</span> <span class="nf">convert_to_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AxisType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_to_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AxisType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the :class:`jax_utils.jax_tensor.JaxTensor` object so that it can be passed as</span>
 <span class="sd">        the ``in_axes`` or ``out_axes`` arguments of</span>
 <span class="sd">        `jax.vmap &lt;https://jax.readthedocs.io/en/latest/_autosummary/jax.vmap.html&gt;`_ and</span>
@@ -201,7 +201,7 @@
 
 <div class="viewcode-block" id="NonNegativeValues">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.NonNegativeValues">[docs]</a>
-<span class="k">class</span> <span class="nc">NonNegativeValues</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NonNegativeValues</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface to be used in combination with :class:`jax_utils.jax_tensor.JaxTensor` in order</span>
 <span class="sd">    to implement JAX tensors that are constrained to take non-negative ``values``.</span>
 
@@ -213,13 +213,13 @@
 
     <span class="c1"># pylint: disable=C0116</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 
     <span class="c1"># pylint: disable=C0116</span>
 <div class="viewcode-block" id="NonNegativeValues.reverse_values">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.NonNegativeValues.reverse_values">[docs]</a>
-    <span class="k">def</span> <span class="nf">reverse_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reverse_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">values</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
 </div>
 
@@ -227,7 +227,7 @@
 
 <div class="viewcode-block" id="NonNegativeBudgetedValues">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.NonNegativeBudgetedValues">[docs]</a>
-<span class="k">class</span> <span class="nc">NonNegativeBudgetedValues</span><span class="p">(</span><span class="n">NonNegativeValues</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NonNegativeBudgetedValues</span><span class="p">(</span><span class="n">NonNegativeValues</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface to be used in combination with :class:`jax_utils.jax_tensor.JaxTensor` in order to</span>
 <span class="sd">    implement JAX tensors that are constrained to both take non-negative ``values`` and have their</span>
 <span class="sd">    sum over the last axis bounded by  a maximal &quot;budget&quot; (``max_budget``).</span>
@@ -242,7 +242,7 @@
     <span class="n">max_budget</span><span class="p">:</span> <span class="n">Number</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">max_budget</span>
             <span class="o">*</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
@@ -251,7 +251,7 @@
 
 <div class="viewcode-block" id="NonNegativeBudgetedValues.reverse_values">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.NonNegativeBudgetedValues.reverse_values">[docs]</a>
-    <span class="k">def</span> <span class="nf">reverse_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reverse_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">output</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
         <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_budget</span> <span class="o">-</span> <span class="n">values</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="mf">1e-6</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reverse_values</span><span class="p">(</span><span class="n">output</span><span class="p">)</span></div>
@@ -268,7 +268,7 @@
 <div class="viewcode-block" id="RegularizedJaxCost">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.RegularizedJaxCost">[docs]</a>
 <span class="nd">@jdc</span><span class="o">.</span><span class="n">pytree_dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">RegularizedJaxCost</span><span class="p">(</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RegularizedJaxCost</span><span class="p">(</span>
     <span class="n">RegularizedArrayLikeCost</span><span class="p">[</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">BaseJaxCompilable</span><span class="p">,</span>
     <span class="n">Generic</span><span class="p">[</span><span class="n">JaxCostType</span><span class="p">,</span> <span class="n">JaxRegularizedCostType</span><span class="p">],</span>
@@ -290,7 +290,7 @@
 <div class="viewcode-block" id="RegularizedJaxCost.mean">
 <a class="viewcode-back" href="../../_api/jax_utils.html#jax_utils.jax_tensor.RegularizedJaxCost.mean">[docs]</a>
     <span class="nd">@jit_when_compilation_enabled</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </div>
 
