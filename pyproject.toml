@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ai-helpers-jax-utils"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Common jax utils"
 authors = ["Corentin Vasseur <vasseur.corentin@gmail.com>"]
 packages = [{ include = "jax_utils" }]
